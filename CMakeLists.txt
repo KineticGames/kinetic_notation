@@ -54,10 +54,10 @@ include_directories(include)
 
 add_library(kinetic_notation STATIC
     # Source files
-    
+    src/token_info.c
 
     # Header files
-
+    include/token_info.h
 
     # Autogen
     ${BISON_parser_OUTPUTS}

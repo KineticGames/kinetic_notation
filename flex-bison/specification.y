@@ -1,13 +1,16 @@
 %{
 #include <stdio.h>
+#include "../include/token_info.h"
 %}
 
-%token A
+%define api.value.type {token_info}
+
+%token END 0
 
 %%
 
-b:	A
- ;
+sdl:	END
+   ;
 
 %%
 
