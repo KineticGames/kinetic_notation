@@ -53,13 +53,15 @@ add_flex_bison_dependency(lexer parser)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(include)
 
-add_executable(kinetic_notation 
+add_library(kinetic_notation 
     # Source files
-    src/token_info.c
+    src/ir_token_info.c
+    src/scanner.c
 
     # Header files
-    include/token_info.h
+    include/ir_token_info.h
     include/object_list.h
+    include/scanner.h
 
     # Autogen
     ${BISON_parser_OUTPUTS}
@@ -74,7 +76,7 @@ add_executable(kinetic_notation_test
 
 target_link_libraries(kinetic_notation_test
     gtest_main
-#    kinetic_notation
+    kinetic_notation
 )
 
 include(GoogleTest)

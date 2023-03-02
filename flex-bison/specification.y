@@ -1,28 +1,44 @@
 %code requires {
-#include "object_list.h"
+#include "../include/object_list.h"
+#include "../include/ir_token_info.h"
 
-#define YYSTYPE value_types
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                            \
+  do {                                                                         \
+    if (N) {                                                                   \
+      token_info_combine(&(Cur), &YYRHSLOC(Rhs, 1));                           \
+      token_info_combine(&(Cur), &YYRHSLOC(Rhs, N));                           \
+    } else {                                                                   \
+      token_info_combine(&(Cur), &YYRHSLOC(Rhs, 0));                           \
+    }                                                                          \
+  } while (0)
+
+#define YYLOCATION_PRINT token_info_print
 }
+
+%define api.pure
+%define api.location.type {token_info}
+%define api.value.type {value_types}
 
 %code {
 #include <stdio.h>
 
-void yyerror(char *s);
+void yyerror(const char *s);
 struct statement *head;
 }
+
 
 %token END 0
 %token UNRECOGNIZED
 %token <string> KEY
 %token <version> VERSION
 %token <string> STRING
-
-%token TRUE
-%token FALSE
+%token <boolean> BOOLEAN
 
 %type <string> string
 %type <boolean> boolean
 %type <version> version
+
+%locations
 
 %%
 
@@ -39,8 +55,7 @@ value:		    array
      |		    boolean
      ;
 
-boolean:	    TRUE		    	{ $$ = 1; }
-       |    	    FALSE		    	{ $$ = 0; }
+boolean:	    BOOLEAN			{ $$ = $1; }
        ;
 
 string:		    STRING		    	{ $$ = $1; }
@@ -73,6 +88,6 @@ int main() {
     } while (!feof(yyin));
 }
 
-void yyerror(char *s) {
+void yyerror(const char *s) {
     fprintf(stderr, "%s\n", s);
 }

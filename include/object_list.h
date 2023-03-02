@@ -20,8 +20,6 @@ struct statement {
   struct statement *next;
 };
 
-#define YYSTYPE value_types
-
 struct object {
   struct statement *first_statement;
   struct object *next;
