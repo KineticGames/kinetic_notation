@@ -45,6 +45,7 @@ bison_target(
     flex-bison/specification.y
     ${CMAKE_CURRENT_BINARY_DIR}/parser.auto.c
     DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.auto.h
+    COMPILE_FLAGS "-Wall"
 )
 
 add_flex_bison_dependency(lexer parser)
@@ -52,12 +53,13 @@ add_flex_bison_dependency(lexer parser)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(include)
 
-add_library(kinetic_notation STATIC
+add_executable(kinetic_notation 
     # Source files
     src/token_info.c
 
     # Header files
     include/token_info.h
+    include/object_list.h
 
     # Autogen
     ${BISON_parser_OUTPUTS}
@@ -72,7 +74,7 @@ add_executable(kinetic_notation_test
 
 target_link_libraries(kinetic_notation_test
     gtest_main
-    kinetic_notation
+#    kinetic_notation
 )
 
 include(GoogleTest)
