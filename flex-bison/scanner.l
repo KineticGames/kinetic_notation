@@ -1,6 +1,5 @@
 %{
 #include <parser.auto.h>
-#include "../include/scanner.h"
 #include "../include/object_list.h"
 
 // std

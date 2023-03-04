@@ -1,0 +1,10 @@
+#ifndef KINETIC_NOTATION_KEY_TYPE_H
+#define KINETIC_NOTATION_KEY_TYPE_H
+
+typedef enum {
+  STRING,
+  NUMBER,
+  VERSION,
+} key_type;
+
+#endif // KINETIC_NOTATION_KEY_TYPE_H

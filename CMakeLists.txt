@@ -33,52 +33,72 @@ set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/flex_bison)
+
 flex_target(
     lexer
     flex-bison/scanner.l
-    ${CMAKE_CURRENT_BINARY_DIR}/scanner.auto.c
-    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/scanner.auto.h
+    ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/scanner.auto.c
+    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/scanner.auto.h
 )
 
 bison_target(
     parser
     flex-bison/specification.y
-    ${CMAKE_CURRENT_BINARY_DIR}/parser.auto.c
-    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.auto.h
+    ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/parser.auto.c
+    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/parser.auto.h
     COMPILE_FLAGS "-Wall"
 )
 
 add_flex_bison_dependency(lexer parser)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(include)
-
-add_library(kinetic_notation 
+add_library(kinetic_notation STATIC
     # Source files
     src/ir_token_info.c
-    src/scanner.c
+    src/kinetic_notation.c
 
-    # Header files
+    # Private header files
+    src/api_internal.h
+
+    # Public header files
     include/ir_token_info.h
     include/object_list.h
-    include/scanner.h
+    include/key_type.h
 
     # Autogen
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
 
-enable_testing()
-
-add_executable(kinetic_notation_test
-    test/compilation_test.cpp
+target_include_directories(kinetic_notation 
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_BINARY_DIR}/flex_bison
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(kinetic_notation_test
+enable_testing()
+
+add_executable(kinetic_notation_unit_test
+    test/parser_test.cpp
+)
+
+target_link_libraries(kinetic_notation_unit_test
     gtest_main
     kinetic_notation
 )
 
 include(GoogleTest)
-gtest_discover_tests(kinetic_notation_test)
+gtest_discover_tests(kinetic_notation_unit_test)
+
+add_executable(kinetic_notation_integration_test
+    test/kinetic_notation_test.c
+)
+
+target_link_libraries(kinetic_notation_integration_test
+    kinetic_notation
+)
+
+add_test(NAME kinetic_notation_integration_test COMMAND kinetic_notation_integration_test)
 
