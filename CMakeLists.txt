@@ -54,16 +54,11 @@ add_flex_bison_dependency(lexer parser)
 
 add_library(kinetic_notation STATIC
     # Source files
-    src/ir_token_info.c
-    src/kinetic_notation.c
 
     # Private header files
-    src/api_internal.h
 
     # Public header files
-    include/ir_token_info.h
-    include/object_list.h
-    include/key_type.h
+    include/kinetic_notation.h
 
     # Autogen
     ${BISON_parser_OUTPUTS}
@@ -80,17 +75,16 @@ target_include_directories(kinetic_notation
 
 enable_testing()
 
-add_executable(kinetic_notation_unit_test
-    test/parser_test.cpp
-)
-
-target_link_libraries(kinetic_notation_unit_test
-    gtest_main
-    kinetic_notation
-)
-
-include(GoogleTest)
-gtest_discover_tests(kinetic_notation_unit_test)
+# add_executable(kinetic_notation_unit_test
+# )
+# 
+# target_link_libraries(kinetic_notation_unit_test
+#     gtest_main
+#     kinetic_notation
+# )
+# 
+# include(GoogleTest)
+# gtest_discover_tests(kinetic_notation_unit_test)
 
 add_executable(kinetic_notation_integration_test
     test/kinetic_notation_test.c

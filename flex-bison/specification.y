@@ -1,6 +1,5 @@
 %code requires {
-#include "../include/object_list.h"
-#include "../include/ir_token_info.h"
+#include <stdbool.h>
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                            \
   do {                                                                         \
@@ -15,10 +14,6 @@
 #define YYLOCATION_PRINT token_info_print
 }
 
-%define api.pure
-%define api.location.type {token_info}
-%define api.value.type {value_types}
-
 %code {
 #include <stdio.h>
 
@@ -26,6 +21,15 @@ void yyerror(const char *s);
 struct statement *head;
 }
 
+%union {
+  char *string;
+  struct {
+    int major;
+    int minor;
+    int patch;
+  } version;
+  bool boolean;
+}
 
 %token END 0
 %token UNRECOGNIZED

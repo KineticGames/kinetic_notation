@@ -1,14 +1,11 @@
 %{
 #include <parser.auto.h>
-#include "../include/object_list.h"
 
 // std
 #include <string.h>
 #include <stdio.h>
 
 #define yyterminate() return( END )
-
-extern value_types yylval;
 
 /*
 int yycolumn = 1;
