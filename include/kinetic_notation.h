@@ -1,32 +1,50 @@
 #ifndef KINETIC_NOTATION_H
 #define KINETIC_NOTATION_H
 
-#include "key_type.h"
-
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-typedef void Structure;
+struct key {
+  char *key;
+  union {
+    enum {
+      STRING,
+      NUMBER,
+      VERSION,
+      BOOLEAN,
+      VARIABLE_KEY_ARRAY,
+    } value_type;
+    struct key *object_array_outline;
+  };
+};
 
-/* File Structure */
-extern Structure *structure_create();
+#define OUTLINE(outline_name) struct key outline_name[]
+#define OBJECT_ARRAY_OUTLINE (struct key[])
 
-extern void structure_add_key(Structure *structure, const char *key_name,
-                              key_type key_type);
+typedef struct Structure_t Structure;
 
-/* Object Arrays */
-extern void object_array_create(const char *key_name);
-// extern void object_array_add_key(object_array_reference *object_array,
-//                                            const char *key_name,
-//                                            key_type key_type);
-// object_array_reference *
-// object_array_add_object_array(object_array_reference *object_array,
-//                               const char *key_name);
-// variable_key_array_reference *
-// object_array_add_variable_key_array(object_array_reference *object_array,
-//                                     const char *key_name);
-//
-///* Variable Key Arrays */
-// variable_key_array_reference *
-// variable_key_array_reference_create(const char *key_name);
+typedef struct {
+  int major;
+  int minor;
+  int patch;
+} KineticVersion;
+
+typedef struct {
+  union {
+    char *string;
+    KineticVersion version;
+    int number;
+    bool boolean;
+  };
+  bool filled;
+} KineticValue;
+
+extern Structure *parse_file(char *file_path, struct key outline[]);
+
+extern KineticValue structure_get_key(Structure *structure, char *key);
+extern void structure_get_object_array(Structure *structure, char *key,
+                                       int *array_length,
+                                       Structure **object_array);
 
 #endif // KINETIC_NOTATION_H
