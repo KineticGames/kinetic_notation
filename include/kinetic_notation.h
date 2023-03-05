@@ -11,6 +11,9 @@ typedef enum KnResult {
   INVALID_ARGUMENT,
   NESTED_OBJECT_ARRAY,
   NULL_STRING,
+  NO_VALUE,
+  INVALID_KEY,
+  KEY_NOT_FOUND,
 } KnResult;
 
 struct KnKeyCreateInfo;
@@ -43,24 +46,22 @@ typedef struct {
   int patch;
 } KnVersion;
 
-typedef struct {
-  union value {
-    char *string;
-    KnVersion version;
-    int number;
-    bool boolean;
-  } value;
-  bool filled;
+typedef union {
+  char *string;
+  KnVersion version;
+  int number;
+  bool boolean;
 } KnValue;
 
 KnResult knCreateStructure(const KnStructureCreateInfo *createInfo,
                            KnStructure *structure);
 void knDestroyStructure(KnStructure structure);
 
-KnResult knParseFileUsingStructure(char *file_path, KnStructure structure);
+KnResult knParseUsingStructure(char *buffer, KnStructure structure);
 
-void knGetKeyFromStructure(KnStructure structure, KnValue *value);
-void knGetObjectArrayFromStructure(KnStructure structure, char *key,
+KnResult knGetKeyFromStructure(KnStructure structure, const char *key,
+                               KnValue *value);
+void knGetObjectArrayFromStructure(KnStructure structure, const char *key,
                                    uint32_t *array_length,
                                    KnStructure *object_array);
 
