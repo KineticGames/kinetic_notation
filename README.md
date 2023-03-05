@@ -5,23 +5,30 @@
 3. get back the wanted structure.
 
 ```c
-OUTLINE(outline) = {
-    {.key = "name", .value_type = STRING},
-    {.key = "c_version", .value_type = NUMBER},
-    {.key = "version", .value_type = VERSION},
-    {.key = "repository", .value_type = STRING},
-    {.key = "owner", .value_type = STRING},
-    {
-        .key = "dependencies",
-        .object_array_outline =
-            OBJECT_ARRAY_OUTLINE{
-                {.key = "name", .value_type = STRING},
-                {.key = "version", .value_type = VERSION},
-                {.key = "options", .value_type = VARIABLE_KEY_ARRAY},
-                {.key = "repository", .value_type = STRING},
-            },
-    },
-};
+  KnStructureCreateInfo create_info = {
+      .keys =
+          (KnKeyCreateInfo[]){
+              {.key = "name", .type = STRING},
+              {.key = "c_version", .type = NUMBER},
+              {.key = "version", .type = VERSION},
+              {
+                  .key = "dependencies",
+                  .type = OBJECT_ARRAY,
+                  .objectArrayOutline =
+                      (KnStructureCreateInfo){
+                          .keys =
+                              (KnKeyCreateInfo[]){
+                                  {.key = "name", .type = STRING},
+                                  {.key = "options",
+                                   .type = VARIABLE_KEY_ARRAY},
+                                  {.key = "version", .type = VERSION},
+                              },
+                          .keyCount = 3,
+                      },
+              },
+          },
+      .keyCount = 4,
+  };
 
 Structure *build_definition = parse_file("/path/to/file.kn", outline);
 

@@ -8,7 +8,7 @@ project(kinetic_notation)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_EXPORT_COMPILE_COMMANDS "-Wall")
 
 # ====================================
 # GTEST
@@ -54,8 +54,7 @@ add_flex_bison_dependency(lexer parser)
 
 add_library(kinetic_notation STATIC
     # Source files
-
-    # Private header files
+    src/structure.c
 
     # Public header files
     include/kinetic_notation.h

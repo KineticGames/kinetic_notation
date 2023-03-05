@@ -2,49 +2,63 @@
 #define KINETIC_NOTATION_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-struct key {
+typedef enum KnResult {
+  SUCCESS,
+} KnResult;
+
+struct KnKeyCreateInfo;
+
+typedef struct KnStructureCreateInfo {
+  uint32_t keyCount;
+  struct KnKeyCreateInfo *keys;
+} KnStructureCreateInfo;
+
+typedef enum KnValueType {
+  STRING,
+  NUMBER,
+  VERSION,
+  BOOLEAN,
+  VARIABLE_KEY_ARRAY,
+  OBJECT_ARRAY,
+} KnValueType;
+
+typedef struct KnKeyCreateInfo {
   char *key;
-  union {
-    enum {
-      STRING,
-      NUMBER,
-      VERSION,
-      BOOLEAN,
-      VARIABLE_KEY_ARRAY,
-    } value_type;
-    struct key *object_array_outline;
-  };
-};
+  KnValueType type;
+  struct KnStructureCreateInfo objectArrayOutline;
+} KnKeyCreateInfo;
 
-#define OUTLINE(outline_name) struct key outline_name[]
-#define OBJECT_ARRAY_OUTLINE (struct key[])
-
-typedef struct Structure_t Structure;
+typedef struct KnStructure *KnStructure;
 
 typedef struct {
   int major;
   int minor;
   int patch;
-} KineticVersion;
+} KnVersion;
 
 typedef struct {
-  union {
+  union value {
     char *string;
-    KineticVersion version;
+    KnVersion version;
     int number;
     bool boolean;
-  };
+  } value;
   bool filled;
-} KineticValue;
+} KnValue;
 
-extern Structure *parse_file(char *file_path, struct key outline[]);
+KnResult knCreateStructure(const KnStructureCreateInfo *createInfo,
+                           KnStructure *structure);
+void knDestroyStructure(KnStructure structure);
 
-extern KineticValue structure_get_key(Structure *structure, char *key);
-extern void structure_get_object_array(Structure *structure, char *key,
-                                       int *array_length,
-                                       Structure **object_array);
+KnResult knParseFileUsingStructure(char *file_path, KnStructure structure);
+
+void knGetKeyFromStructure(KnStructure structure, KnValue *value);
+void knGetObjectArrayFromStructure(KnStructure structure, char *key,
+                                   uint32_t *array_length,
+                                   KnStructure *object_array);
 
 #endif // KINETIC_NOTATION_H
