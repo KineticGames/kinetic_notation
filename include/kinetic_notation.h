@@ -22,7 +22,6 @@ typedef enum KnValueType {
   NUMBER,
   VERSION,
   BOOLEAN,
-  VARIABLE_KEY_ARRAY,
   OBJECT_ARRAY,
 } KnValueType;
 

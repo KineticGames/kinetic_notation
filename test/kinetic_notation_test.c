@@ -29,11 +29,9 @@ int main() {
                           .keys =
                               (KnKeyCreateInfo[]){
                                   {.key = "name", .type = STRING},
-                                  {.key = "options",
-                                   .type = VARIABLE_KEY_ARRAY},
                                   {.key = "version", .type = VERSION},
                               },
-                          .keyCount = 3,
+                          .keyCount = 2,
                       },
               },
           },
