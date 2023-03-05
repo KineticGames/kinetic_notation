@@ -8,6 +8,9 @@
 
 typedef enum KnResult {
   SUCCESS,
+  INVALID_ARGUMENT,
+  NESTED_OBJECT_ARRAY,
+  NULL_STRING,
 } KnResult;
 
 struct KnKeyCreateInfo;
@@ -22,13 +25,14 @@ typedef enum KnValueType {
   NUMBER,
   VERSION,
   BOOLEAN,
+  OBJECT,
   OBJECT_ARRAY,
 } KnValueType;
 
 typedef struct KnKeyCreateInfo {
   char *key;
   KnValueType type;
-  struct KnStructureCreateInfo objectArrayOutline;
+  struct KnStructureCreateInfo objectOutline;
 } KnKeyCreateInfo;
 
 typedef struct KnStructure *KnStructure;

@@ -8,7 +8,7 @@ project(kinetic_notation)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_EXPORT_COMPILE_COMMANDS "-Wall")
+set(CMAKE_C_FLAGS "-Wall -ggdb")
 
 # ====================================
 # GTEST

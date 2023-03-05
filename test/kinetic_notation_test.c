@@ -24,7 +24,7 @@ int main() {
               {
                   .key = "dependencies",
                   .type = OBJECT_ARRAY,
-                  .objectArrayOutline =
+                  .objectOutline =
                       (KnStructureCreateInfo){
                           .keys =
                               (KnKeyCreateInfo[]){
@@ -43,6 +43,8 @@ int main() {
 
   ASSERT_EQ(result, SUCCESS);
   ASSERT_NE(structure, NULL);
+
+  knDestroyStructure(structure);
 
   return 0;
 }
