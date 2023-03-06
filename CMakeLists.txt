@@ -55,6 +55,10 @@ add_flex_bison_dependency(lexer parser)
 add_library(kinetic_notation STATIC
     # Source files
     src/structure.c
+    src/string_split.c
+
+    # Private header files
+    src/string_split.h
 
     # Public header files
     include/kinetic_notation.h
