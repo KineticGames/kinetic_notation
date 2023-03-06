@@ -61,8 +61,8 @@ KnResult knParseUsingStructure(char *buffer, KnStructure structure);
 
 KnResult knGetKeyFromStructure(KnStructure structure, const char *key,
                                KnValue *value);
-void knGetObjectArrayFromStructure(KnStructure structure, const char *key,
-                                   uint32_t *array_length,
-                                   KnStructure *object_array);
+KnResult knGetObjectArrayFromStructure(KnStructure structure, const char *key,
+                                       uint32_t *array_length,
+                                       KnStructure *object_array);
 
 #endif // KINETIC_NOTATION_H

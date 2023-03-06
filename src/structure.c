@@ -142,7 +142,7 @@ KnResult enumerate_string_split_at(const char *string, char split_char,
         key_parts[p][len - 1] = '\0';
 
         prev_part = i;
-        p++;;
+        p++;
       }
     }
     int len = total_len - prev_part;
@@ -168,6 +168,19 @@ KnResult knGetKeyFromStructure(KnStructure structure, const char *key,
   return KEY_NOT_FOUND;
 }
 
-void knGetObjectArrayFromStructure(KnStructure structure, const char *key,
-                                   uint32_t *array_length,
-                                   KnStructure *object_array) {}
+KnResult knGetObjectArrayFromStructure(KnStructure structure, const char *key,
+                                       uint32_t *array_length,
+                                       KnStructure *object_array) {
+  for (int i = 0; i < structure->key_count; ++i) {
+    if (strcmp(structure->keys[i].key, key) == 0) {
+      if (!structure->keys[i].filled) {
+        return NO_VALUE;
+      }
+      *array_length = structure->keys[i].object_array.objectCount;
+      *object_array = structure->keys[i].object_array.array;
+      return SUCCESS;
+    }
+  }
+
+  return KEY_NOT_FOUND;
+}
