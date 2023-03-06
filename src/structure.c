@@ -98,7 +98,11 @@ void knDestroyStructure(struct KnStructure *structure) {
   free(structure);
 }
 
-KnResult knParseUsingStructure(char *buffer, KnStructure structure);
+KnResult knParseUsingStructure(char *buffer, size_t buffer_size,
+                               KnStructure structure) {
+  // TODO
+  return SUCCESS;
+}
 
 KnResult knGetKeyFromStructure(KnStructure structure, const char *key,
                                KnValue *value) {
