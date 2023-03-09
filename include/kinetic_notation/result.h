@@ -11,6 +11,7 @@ typedef enum KnResult {
   KEY_NOT_FOUND,
   PARSER_ERROR,
   SCANNER_ERROR,
+  NO_MATCH,
 } KnResult;
 
 #endif // KINETIC_NOTATION_RESULT_H

@@ -1,5 +1,5 @@
-#ifndef KINETIC_NOTATION_STRUCTURE_H
-#define KINETIC_NOTATION_STRUCTURE_H
+#ifndef KINETIC_NOTATION_KINETIC_NOTATION_STRUCTURE_H
+#define KINETIC_NOTATION_KINETIC_NOTATION_STRUCTURE_H
 
 #include "result.h"
 #include "types.h"
@@ -20,7 +20,7 @@ typedef enum KnValueType {
   NUMBER,
   VERSION,
   BOOLEAN,
-  OBJECT,
+  SUB_OBJECT,
   OBJECT_ARRAY,
   VARIABLE_KEY_ARRAY,
 } KnValueType;
@@ -48,4 +48,4 @@ KnResult kinetic_notation_structure_get_object_array(KnStructure structure,
                                                      uint32_t *array_length,
                                                      KnStructure *object_array);
 
-#endif // KINETIC_NOTATION_STRUCTURE_H
+#endif // KINETIC_NOTATION_KINETIC_NOTATION_STRUCTURE_H

@@ -1,3 +1,5 @@
+#include "structure.h"
+
 #include "kinetic_notation.h"
 #include "string_split.h"
 
@@ -8,20 +10,7 @@
 #include <string.h>
 
 struct KnStructure_t {
-  struct KVPair {
-    char *key;
-    KnValueType type;
-    union {
-      KnValue value;
-      struct KnStructure_t *object;
-      struct {
-        KnStructureCreateInfo createInfo;
-        uint32_t objectCount;
-        struct KnStructure_t *array;
-      } object_array;
-    };
-    bool filled;
-  } *keys;
+  KVPair *keys;
   uint32_t key_count;
 };
 
@@ -51,7 +40,7 @@ kinetic_notation_structure_create(const KnStructureCreateInfo *createInfo,
 
 void kinetic_notation_structure_destroy(struct KnStructure_t *structure) {
   for (int i = 0; i < structure->key_count; ++i) {
-    if (structure->keys[i].type == OBJECT) {
+    if (structure->keys[i].type == SUB_OBJECT) {
       kinetic_notation_structure_destroy(structure->keys[i].object);
     }
     free(structure->keys[i].key);
@@ -105,7 +94,7 @@ KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
   }
 
   size_t key_count = createInfo.keyCount;
-  struct KVPair keys[key_count];
+  KVPair keys[key_count];
   for (int i = 0; i < key_count; ++i) {
     if (createInfo.keys[i].key == NULL) {
       return NULL_STRING;
@@ -115,7 +104,7 @@ KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
     keys[i].type = createInfo.keys[i].type;
     keys[i].filled = false;
 
-    if (createInfo.keys[i].type == OBJECT) {
+    if (createInfo.keys[i].type == SUB_OBJECT) {
       keys[i].object = malloc(sizeof(struct KnStructure_t));
 
       KnResult result = create_structure_from_create_info(
@@ -136,8 +125,18 @@ KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
     }
   }
 
-  size_t array_size = key_count * sizeof(struct KVPair);
+  size_t array_size = key_count * sizeof(KVPair);
   structure->keys = malloc(array_size);
   memcpy(structure->keys, keys, array_size);
   return SUCCESS;
+}
+
+KVPair *structure_find_key(KnStructure structure, const char *key) {
+  for (int i = 0; i < structure->key_count; ++i) {
+    if (strcmp(structure->keys[i].key, key) == 0) {
+      return &structure->keys[i];
+    }
+  }
+
+  return NULL;
 }
