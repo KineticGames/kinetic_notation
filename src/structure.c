@@ -1,6 +1,7 @@
 #include "structure.h"
 
 #include "kinetic_notation.h"
+#include "parser.h"
 #include "string_split.h"
 
 // std
@@ -49,10 +50,9 @@ void kinetic_notation_structure_destroy(struct KnStructure_t *structure) {
   free(structure);
 }
 
-KnResult kinetic_notation_structure_parse(char *buffer, size_t buffer_size,
+KnResult kinetic_notation_structure_parse(const char *buffer,
                                           KnStructure structure) {
-  // TODO
-  return SUCCESS;
+  return parse(structure, buffer);
 }
 
 KnResult kinetic_notation_structure_get_key(KnStructure structure,
@@ -108,26 +108,31 @@ KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
       keys[i].object = malloc(sizeof(struct KnStructure_t));
 
       KnResult result = create_structure_from_create_info(
-          createInfo.keys[i].objectOutline, keys[i].object);
+          createInfo.keys[i].with.object_outline, keys[i].object);
 
       if (result != SUCCESS) {
         return result;
       }
-
     } else if (createInfo.keys[i].type == OBJECT_ARRAY) {
-      for (int i = 0; i < createInfo.keys[i].objectOutline.keyCount; ++i) {
-        if (createInfo.keys[i].objectOutline.keys[i].type == OBJECT_ARRAY) {
+      for (int i = 0; i < createInfo.keys[i].with.object_outline.keyCount;
+           ++i) {
+        if (createInfo.keys[i].with.object_outline.keys[i].type ==
+            OBJECT_ARRAY) {
           return NESTED_OBJECT_ARRAY;
         }
       }
 
-      keys[i].object_array.createInfo = createInfo.keys[i].objectOutline;
+      keys[i].object_array.createInfo = createInfo.keys[i].with.object_outline;
+    } else if (createInfo.keys[i].type == VARIABLE_KEY_ARRAY) {
+      keys[i].variable_key_array.type =
+          createInfo.keys[i].with.variable_key_array_type;
     }
   }
 
   size_t array_size = key_count * sizeof(KVPair);
   structure->keys = malloc(array_size);
   memcpy(structure->keys, keys, array_size);
+  structure->key_count = key_count;
   return SUCCESS;
 }
 

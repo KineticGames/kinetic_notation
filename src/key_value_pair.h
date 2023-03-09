@@ -3,7 +3,7 @@
 
 #include "kinetic_notation/structure.h"
 
-typedef struct {
+typedef struct KVPair_t {
   char *key;
   KnValueType type;
   union {
@@ -14,6 +14,13 @@ typedef struct {
       uint32_t objectCount;
       struct KnStructure_t *array;
     } object_array;
+    struct {
+      KnValueType type;
+      struct variable_key_array_list_node {
+        struct KVPair_t *pair;
+        struct variable_key_array_list_node *next;
+      } *variable_key_array_list;
+    } variable_key_array;
   };
   bool filled;
 } KVPair;

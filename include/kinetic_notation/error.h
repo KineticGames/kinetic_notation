@@ -8,6 +8,6 @@ typedef struct {
   KnResult associated_result;
 } KnError;
 
-char *kinetic_notation_get_error();
+const char *kinetic_notation_get_error();
 
 #endif // KINETIC_NOTATION_KINETIC_NOTATION_ERROR_H

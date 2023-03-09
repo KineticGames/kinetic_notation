@@ -28,7 +28,10 @@ typedef enum KnValueType {
 typedef struct KnKeyCreateInfo {
   char *key;
   KnValueType type;
-  struct KnStructureCreateInfo objectOutline;
+  union {
+    struct KnStructureCreateInfo object_outline;
+    KnValueType variable_key_array_type;
+  } with;
 } KnKeyCreateInfo;
 
 typedef struct KnStructure_t *KnStructure;
@@ -38,7 +41,7 @@ kinetic_notation_structure_create(const KnStructureCreateInfo *createInfo,
                                   KnStructure *structure);
 void kinetic_notation_structure_destroy(KnStructure structure);
 
-KnResult kinetic_notation_structure_parse(char *buffer, size_t buffer_size,
+KnResult kinetic_notation_structure_parse(const char *buffer,
                                           KnStructure structure);
 
 KnResult kinetic_notation_structure_get_key(KnStructure structure,
