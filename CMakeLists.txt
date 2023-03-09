@@ -10,37 +10,30 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "-Wall -ggdb")
 
-add_library(kinetic_notation STATIC
-    # Source files
-    src/structure.c
-    src/string_split.c
-    src/scanner.c
+add_library(
+  kinetic_notation STATIC
+  # Source files
+  src/structure.c
+  src/string_split.c
+  src/scanner.c
+  src/parser.c
+  # Private header files
+  src/string_split.h
+  src/scanner.h
+  src/parser.h
+  # Public header files
+  include/kinetic_notation.h)
 
-    # Private header files
-    src/string_split.h
-    src/scanner.h
-
-    # Public header files
-    include/kinetic_notation.h
-)
-
-target_include_directories(kinetic_notation 
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_BINARY_DIR}/flex_bison
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+target_include_directories(
+  kinetic_notation
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 enable_testing()
 
-add_executable(kinetic_notation_integration_test
-    test/kinetic_notation_test.c
-)
+add_executable(kinetic_notation_integration_test test/kinetic_notation_test.c)
 
-target_link_libraries(kinetic_notation_integration_test
-    kinetic_notation
-)
+target_link_libraries(kinetic_notation_integration_test kinetic_notation)
 
-add_test(NAME kinetic_notation_integration_test COMMAND kinetic_notation_integration_test)
-
+add_test(NAME kinetic_notation_integration_test
+         COMMAND kinetic_notation_integration_test)
