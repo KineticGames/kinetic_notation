@@ -26,6 +26,79 @@ struct KnStructure_t {
 };
 
 KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
+                                           struct KnStructure_t *structure);
+
+KnResult
+kinetic_notation_structure_create(const KnStructureCreateInfo *createInfo,
+                                  KnStructure *structure) {
+  if (createInfo == NULL || structure == NULL) {
+    return INVALID_ARGUMENT;
+  }
+
+  struct KnStructure_t created_structure = {};
+  KnResult result =
+      create_structure_from_create_info(*createInfo, &created_structure);
+  if (result != SUCCESS) {
+    return result;
+  }
+
+  *structure = malloc(sizeof(struct KnStructure_t));
+  *structure =
+      memcpy(*structure, &created_structure, sizeof(struct KnStructure_t));
+
+  return SUCCESS;
+}
+
+void kinetic_notation_structure_destroy(struct KnStructure_t *structure) {
+  for (int i = 0; i < structure->key_count; ++i) {
+    if (structure->keys[i].type == OBJECT) {
+      kinetic_notation_structure_destroy(structure->keys[i].object);
+    }
+    free(structure->keys[i].key);
+  }
+  free(structure->keys);
+  free(structure);
+}
+
+KnResult kinetic_notation_structure_parse(char *buffer, size_t buffer_size,
+                                          KnStructure structure) {
+  // TODO
+  return SUCCESS;
+}
+
+KnResult kinetic_notation_structure_get_key(KnStructure structure,
+                                            const char *key, KnValue *value) {
+  for (int i = 0; i < structure->key_count; ++i) {
+    if (strcmp(structure->keys[i].key, key) == 0) {
+      if (!structure->keys[i].filled) {
+        return NO_VALUE;
+      }
+      *value = structure->keys[i].value;
+      return SUCCESS;
+    }
+  }
+
+  return KEY_NOT_FOUND;
+}
+
+KnResult kinetic_notation_structure_get_object_array(
+    KnStructure structure, const char *key, uint32_t *array_length,
+    KnStructure *object_array) {
+  for (int i = 0; i < structure->key_count; ++i) {
+    if (strcmp(structure->keys[i].key, key) == 0) {
+      if (!structure->keys[i].filled) {
+        return NO_VALUE;
+      }
+      *array_length = structure->keys[i].object_array.objectCount;
+      *object_array = structure->keys[i].object_array.array;
+      return SUCCESS;
+    }
+  }
+
+  return KEY_NOT_FOUND;
+}
+
+KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
                                            struct KnStructure_t *structure) {
   if (structure == NULL) {
     return INVALID_ARGUMENT;
@@ -67,73 +140,4 @@ KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
   structure->keys = malloc(array_size);
   memcpy(structure->keys, keys, array_size);
   return SUCCESS;
-}
-
-KnResult knCreateStructure(const KnStructureCreateInfo *createInfo,
-                           KnStructure *structure) {
-  if (createInfo == NULL || structure == NULL) {
-    return INVALID_ARGUMENT;
-  }
-
-  struct KnStructure_t created_structure = {};
-  KnResult result =
-      create_structure_from_create_info(*createInfo, &created_structure);
-  if (result != SUCCESS) {
-    return result;
-  }
-
-  *structure = malloc(sizeof(struct KnStructure_t));
-  *structure =
-      memcpy(*structure, &created_structure, sizeof(struct KnStructure_t));
-
-  return SUCCESS;
-}
-
-void knDestroyStructure(struct KnStructure_t *structure) {
-  for (int i = 0; i < structure->key_count; ++i) {
-    if (structure->keys[i].type == OBJECT) {
-      knDestroyStructure(structure->keys[i].object);
-    }
-    free(structure->keys[i].key);
-  }
-  free(structure->keys);
-  free(structure);
-}
-
-KnResult knParseUsingStructure(char *buffer, size_t buffer_size,
-                               KnStructure structure) {
-  // TODO
-  return SUCCESS;
-}
-
-KnResult knGetKeyFromStructure(KnStructure structure, const char *key,
-                               KnValue *value) {
-  for (int i = 0; i < structure->key_count; ++i) {
-    if (strcmp(structure->keys[i].key, key) == 0) {
-      if (!structure->keys[i].filled) {
-        return NO_VALUE;
-      }
-      *value = structure->keys[i].value;
-      return SUCCESS;
-    }
-  }
-
-  return KEY_NOT_FOUND;
-}
-
-KnResult knGetObjectArrayFromStructure(KnStructure structure, const char *key,
-                                       uint32_t *array_length,
-                                       KnStructure *object_array) {
-  for (int i = 0; i < structure->key_count; ++i) {
-    if (strcmp(structure->keys[i].key, key) == 0) {
-      if (!structure->keys[i].filled) {
-        return NO_VALUE;
-      }
-      *array_length = structure->keys[i].object_array.objectCount;
-      *object_array = structure->keys[i].object_array.array;
-      return SUCCESS;
-    }
-  }
-
-  return KEY_NOT_FOUND;
 }
