@@ -14,9 +14,11 @@ add_library(kinetic_notation STATIC
     # Source files
     src/structure.c
     src/string_split.c
+    src/scanner.c
 
     # Private header files
     src/string_split.h
+    src/scanner.h
 
     # Public header files
     include/kinetic_notation.h
