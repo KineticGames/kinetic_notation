@@ -62,8 +62,6 @@ Token scanner_scan_token(Scanner scanner) {
     return make_token(scanner, TOKEN_RIGHT_BRACE);
   case (':'):
     return make_token(scanner, TOKEN_COLON);
-  case (','):
-    return make_token(scanner, TOKEN_COMMA);
   case ('\n'):
     scanner->line++;
     return make_token(scanner, TOKEN_NEWLINE);

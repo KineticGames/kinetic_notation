@@ -1,6 +1,7 @@
 #include "parser.h"
 
 #include "error.h"
+#include "kinetic_notation/structure.h"
 #include "scanner.h"
 #include "structure.h"
 
@@ -139,7 +140,8 @@ static KnResult parse_string(Parser parser, KVPair *kv_pair) {
   kv_pair->value.string =
       strndup(parser.previous.start + 1, parser.previous.length - 2);
   kv_pair->filled = true;
-  return SUCCESS;
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
+                 PARSER_ERROR);
 }
 
 static KnResult parse_number(Parser parser, KVPair *kv_pair) {
@@ -150,7 +152,8 @@ static KnResult parse_number(Parser parser, KVPair *kv_pair) {
   }
   kv_pair->value.number = atoi(parser.previous.start);
   kv_pair->filled = true;
-  return SUCCESS;
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
+                 PARSER_ERROR);
 }
 
 static KnResult parse_version(Parser parser, KVPair *kv_pair) {
@@ -163,7 +166,8 @@ static KnResult parse_version(Parser parser, KVPair *kv_pair) {
   sscanf(parser.previous.start, "%d.%d.%d", &v.major, &v.minor, &v.patch);
   kv_pair->value.version = v;
   kv_pair->filled = true;
-  return SUCCESS;
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
+                 PARSER_ERROR);
 }
 
 static KnResult parse_boolean(Parser parser, KVPair *kv_pair) {
@@ -188,20 +192,96 @@ static KnResult parse_boolean(Parser parser, KVPair *kv_pair) {
       return result;
     }
 
-    return error_at_current(parser, "Expected one of 'true' or 'false'",
+    return error_at_current(parser, "Expect one of 'true' or 'false'",
                             PARSER_ERROR);
   }
-  consume(parser, TOKEN_STRING, "Expect newline after statement.",
-          PARSER_ERROR);
-  return SUCCESS;
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
+                 PARSER_ERROR);
+}
+
+static KnResult parse_object(Parser parser, KnStructure structure) {
+  KnResult result;
+  result = consume(parser, TOKEN_LEFT_BRACKET, "Expect '{'.", PARSER_ERROR);
+  if (result != SUCCESS) {
+    return result;
+  }
+
+  while ((result = match(parser, TOKEN_RIGHT_BRACKET)) == NO_MATCH) {
+    if ((result = statement(structure, parser)) != SUCCESS) {
+      return result;
+    }
+  }
+
+  result =
+      consume(parser, TOKEN_RIGHT_BRACKET, "Expect closing '}'.", PARSER_ERROR);
+  if (result != SUCCESS) {
+    return result;
+  }
+  return consume(parser, TOKEN_NEWLINE,
+                 "Expect newline after object declaration.", PARSER_ERROR);
 }
 
 static KnResult parse_sub_object(Parser parser, KVPair *kv_pair) {
-  return SUCCESS;
+  KnStructure structure = kv_pair->object;
+  return parse_object(parser, structure);
 }
 
 static KnResult parse_object_array(Parser parser, KVPair *kv_pair) {
-  return SUCCESS;
+  KnResult result;
+  result = consume(parser, TOKEN_LEFT_BRACE, "Expected '['.", PARSER_ERROR);
+  if (result != SUCCESS) {
+    return result;
+  }
+
+  struct object_array_node {
+    KnStructure structure;
+    struct object_array_node *next;
+  };
+
+  size_t object_count = 0;
+  struct object_array_node *object_array = NULL;
+  while ((result = match(parser, TOKEN_RIGHT_BRACE)) == NO_MATCH) {
+    struct object_array_node *node = malloc(sizeof(struct object_array_node));
+    kinetic_notation_structure_create(&kv_pair->object_array.createInfo,
+                                      &node->structure);
+
+    result = parse_object(parser, node->structure);
+    if (result != SUCCESS) {
+      return result;
+    }
+
+    node->next = NULL;
+
+    if (object_array == NULL) {
+      object_array = node;
+    } else {
+      struct object_array_node *n = object_array;
+      while (n->next != NULL) {
+        n = n->next;
+      }
+      n->next = object_array;
+    }
+    object_count++;
+  }
+
+  KnStructure array[object_count];
+  struct object_array_node *n = object_array;
+  for (int i = 0; i < object_count; ++i) {
+    array[i] = n->structure;
+    n = n->next;
+  }
+  kv_pair->object_array.array = malloc(object_count * sizeof(KnStructure));
+  memcpy(kv_pair->object_array.array, array,
+         object_count * sizeof(KnStructure));
+  kv_pair->object_array.objectCount = object_count;
+
+  result =
+      consume(parser, TOKEN_RIGHT_BRACE, "Expect closing ']'.", PARSER_ERROR);
+  if (result != SUCCESS) {
+    return result;
+  }
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after array.",
+                 PARSER_ERROR);
 }
 
 static KnResult parse_variable_key_array(Parser parser, KVPair *kv_pair) {
