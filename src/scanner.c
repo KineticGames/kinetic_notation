@@ -66,7 +66,7 @@ Token scanner_scan_token(Scanner scanner) {
     return make_token(scanner, TOKEN_COMMA);
   case ('\n'):
     scanner->line++;
-    return make_token(scanner, TOKEN_COMMA);
+    return make_token(scanner, TOKEN_NEWLINE);
   case '"':
     return string(scanner);
   }
@@ -195,7 +195,7 @@ static void skip_whitespace(Scanner scanner) {
 static Token string(Scanner scanner) {
   while (peek(scanner) != '"' && !is_at_end(scanner)) {
     if (peek(scanner) == '\n') {
-      scanner->line++;
+      return error_token(scanner, "Multiline string.");
     }
     advance(scanner);
   }

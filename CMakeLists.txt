@@ -13,14 +13,16 @@ set(CMAKE_C_FLAGS "-Wall -ggdb")
 add_library(
   kinetic_notation STATIC
   # Source files
-  src/structure.c
-  src/string_split.c
-  src/scanner.c
+  src/error.c
   src/parser.c
+  src/scanner.c
+  src/string_split.c
+  src/structure.c
   # Private header files
-  src/string_split.h
-  src/scanner.h
+  src/error.h
   src/parser.h
+  src/scanner.h
+  src/string_split.h
   # Public header files
   include/kinetic_notation.h
   include/kinetic_notation/error.h
