@@ -10,48 +10,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "-Wall -ggdb")
 
-# ====================================
-# GTEST
-
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
-)
-
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-set_property(TARGET gmock PROPERTY FOLDER "gtest")
-set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
-set_property(TARGET gtest PROPERTY FOLDER "gtest")
-set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
-
-# ====================================
-# FLEX BISON
-
-find_package(FLEX REQUIRED)
-find_package(BISON REQUIRED)
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/flex_bison)
-
-flex_target(
-    lexer
-    flex-bison/scanner.l
-    ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/scanner.auto.c
-    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/scanner.auto.h
-)
-
-bison_target(
-    parser
-    flex-bison/specification.y
-    ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/parser.auto.c
-    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/flex_bison/parser.auto.h
-    COMPILE_FLAGS "-Wall"
-)
-
-add_flex_bison_dependency(lexer parser)
-
 add_library(kinetic_notation STATIC
     # Source files
     src/structure.c
@@ -62,10 +20,6 @@ add_library(kinetic_notation STATIC
 
     # Public header files
     include/kinetic_notation.h
-
-    # Autogen
-    ${BISON_parser_OUTPUTS}
-    ${FLEX_lexer_OUTPUTS}
 )
 
 target_include_directories(kinetic_notation 
@@ -77,17 +31,6 @@ target_include_directories(kinetic_notation
 )
 
 enable_testing()
-
-# add_executable(kinetic_notation_unit_test
-# )
-# 
-# target_link_libraries(kinetic_notation_unit_test
-#     gtest_main
-#     kinetic_notation
-# )
-# 
-# include(GoogleTest)
-# gtest_discover_tests(kinetic_notation_unit_test)
 
 add_executable(kinetic_notation_integration_test
     test/kinetic_notation_test.c
