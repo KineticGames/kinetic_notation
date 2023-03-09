@@ -22,7 +22,11 @@ add_library(
   src/scanner.h
   src/parser.h
   # Public header files
-  include/kinetic_notation.h)
+  include/kinetic_notation.h
+  include/kinetic_notation/error.h
+  include/kinetic_notation/result.h
+  include/kinetic_notation/structure.h
+  include/kinetic_notation/types.h)
 
 target_include_directories(
   kinetic_notation
