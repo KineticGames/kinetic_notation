@@ -2,20 +2,22 @@
 #include "string_split.h"
 
 // std
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-struct KnStructure {
+struct KnStructure_t {
   struct KVPair {
     char *key;
     KnValueType type;
     union {
       KnValue value;
-      struct KnStructure *object;
+      struct KnStructure_t *object;
       struct {
         KnStructureCreateInfo createInfo;
         uint32_t objectCount;
-        struct KnStructure *array;
+        struct KnStructure_t *array;
       } object_array;
     };
     bool filled;
@@ -24,7 +26,7 @@ struct KnStructure {
 };
 
 KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
-                                           struct KnStructure *structure) {
+                                           struct KnStructure_t *structure) {
   if (structure == NULL) {
     return INVALID_ARGUMENT;
   }
@@ -41,7 +43,7 @@ KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
     keys[i].filled = false;
 
     if (createInfo.keys[i].type == OBJECT) {
-      keys[i].object = malloc(sizeof(struct KnStructure));
+      keys[i].object = malloc(sizeof(struct KnStructure_t));
 
       KnResult result = create_structure_from_create_info(
           createInfo.keys[i].objectOutline, keys[i].object);
@@ -73,21 +75,21 @@ KnResult knCreateStructure(const KnStructureCreateInfo *createInfo,
     return INVALID_ARGUMENT;
   }
 
-  struct KnStructure created_structure = {};
+  struct KnStructure_t created_structure = {};
   KnResult result =
       create_structure_from_create_info(*createInfo, &created_structure);
   if (result != SUCCESS) {
     return result;
   }
 
-  *structure = malloc(sizeof(struct KnStructure));
+  *structure = malloc(sizeof(struct KnStructure_t));
   *structure =
-      memcpy(*structure, &created_structure, sizeof(struct KnStructure));
+      memcpy(*structure, &created_structure, sizeof(struct KnStructure_t));
 
   return SUCCESS;
 }
 
-void knDestroyStructure(struct KnStructure *structure) {
+void knDestroyStructure(struct KnStructure_t *structure) {
   for (int i = 0; i < structure->key_count; ++i) {
     if (structure->keys[i].type == OBJECT) {
       knDestroyStructure(structure->keys[i].object);

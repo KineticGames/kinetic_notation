@@ -39,12 +39,12 @@ int main() {
   };
 
   KnStructure structure = NULL;
-  KnResult result = knCreateStructure(&create_info, &structure);
+  KnResult result = kinetic_notation_structure_create(&create_info, &structure);
 
   ASSERT_EQ(result, SUCCESS);
   ASSERT_NE(structure, NULL);
 
-  knDestroyStructure(structure);
+  kinetic_notation_structure_destroy(structure);
 
   return 0;
 }

@@ -2,9 +2,8 @@
 #define KINETIC_NOTATION_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 typedef enum KnResult {
   SUCCESS,
@@ -14,6 +13,8 @@ typedef enum KnResult {
   NO_VALUE,
   INVALID_KEY,
   KEY_NOT_FOUND,
+  PARSER_ERROR,
+  SCANNER_ERROR,
 } KnResult;
 
 struct KnKeyCreateInfo;
@@ -38,7 +39,7 @@ typedef struct KnKeyCreateInfo {
   struct KnStructureCreateInfo objectOutline;
 } KnKeyCreateInfo;
 
-typedef struct KnStructure *KnStructure;
+typedef struct KnStructure_t *KnStructure;
 
 typedef struct {
   int major;
@@ -53,17 +54,21 @@ typedef union {
   bool boolean;
 } KnValue;
 
-KnResult knCreateStructure(const KnStructureCreateInfo *createInfo,
-                           KnStructure *structure);
-void knDestroyStructure(KnStructure structure);
+char *kinetic_notation_get_error();
 
-KnResult knParseUsingStructure(char *buffer, size_t buffer_size,
-                               KnStructure structure);
+KnResult
+kinetic_notation_structure_create(const KnStructureCreateInfo *createInfo,
+                                  KnStructure *structure);
+void kinetic_notation_structure_destroy(KnStructure structure);
 
-KnResult knGetKeyFromStructure(KnStructure structure, const char *key,
-                               KnValue *value);
-KnResult knGetObjectArrayFromStructure(KnStructure structure, const char *key,
-                                       uint32_t *array_length,
-                                       KnStructure *object_array);
+KnResult kinetic_notation_structure_parse(char *buffer, size_t buffer_size,
+                                          KnStructure structure);
+
+KnResult kinetic_notation_structure_get_key(KnStructure structure,
+                                            const char *key, KnValue *value);
+KnResult kinetic_notation_structure_get_object_array(KnStructure structure,
+                                                     const char *key,
+                                                     uint32_t *array_length,
+                                                     KnStructure *object_array);
 
 #endif // KINETIC_NOTATION_H
