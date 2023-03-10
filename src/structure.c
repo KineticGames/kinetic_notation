@@ -10,14 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct KnStructure_t {
-  KVPair *keys;
-  uint32_t key_count;
-};
-
-KnResult create_structure_from_create_info(KnStructureCreateInfo createInfo,
-                                           struct KnStructure_t *structure);
-
 KnResult
 kinetic_notation_structure_create(const KnStructureCreateInfo *createInfo,
                                   KnStructure *structure) {
@@ -79,7 +71,10 @@ KnResult kinetic_notation_structure_get_object_array(
         return NO_VALUE;
       }
       *array_length = structure->keys[i].object_array.objectCount;
-      *object_array = structure->keys[i].object_array.array;
+      if (object_array != NULL) {
+        memcpy(object_array, structure->keys[i].object_array.array,
+               sizeof(KnStructure) * *array_length);
+      }
       return SUCCESS;
     }
   }

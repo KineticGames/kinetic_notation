@@ -12,7 +12,7 @@ typedef struct KVPair_t {
     struct {
       KnStructureCreateInfo createInfo;
       uint32_t objectCount;
-      struct KnStructure_t *array;
+      KnStructure *array;
     } object_array;
     struct {
       KnValueType type;

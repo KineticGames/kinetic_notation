@@ -253,8 +253,9 @@ static KnResult parse_object_array(Parser parser, KVPair *kv_pair) {
   struct object_array_node *object_array = NULL;
   while ((result = match(parser, TOKEN_RIGHT_BRACKET)) == NO_MATCH) {
     struct object_array_node *node = malloc(sizeof(struct object_array_node));
-    kinetic_notation_structure_create(&kv_pair->object_array.createInfo,
-                                      &node->structure);
+    node->structure = malloc(sizeof(struct KnStructure_t));
+    create_structure_from_create_info(kv_pair->object_array.createInfo,
+                                      node->structure);
 
     result = parse_object(parser, node->structure);
     if (result != SUCCESS) {
@@ -270,7 +271,7 @@ static KnResult parse_object_array(Parser parser, KVPair *kv_pair) {
       while (n->next != NULL) {
         n = n->next;
       }
-      n->next = object_array;
+      n->next = node;
     }
     object_count++;
   }
@@ -281,10 +282,11 @@ static KnResult parse_object_array(Parser parser, KVPair *kv_pair) {
     array[i] = n->structure;
     n = n->next;
   }
-  kv_pair->object_array.array = malloc(object_count * sizeof(KnStructure));
-  memcpy(kv_pair->object_array.array, array,
-         object_count * sizeof(KnStructure));
+  size_t array_size = object_count * sizeof(KnStructure);
+  kv_pair->object_array.array = malloc(array_size);
+  memcpy(kv_pair->object_array.array, array, array_size);
   kv_pair->object_array.objectCount = object_count;
+  kv_pair->filled = true;
 
   return consume(parser, TOKEN_NEWLINE, "Expect newline after array.",
                  PARSER_ERROR);
