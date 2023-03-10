@@ -37,7 +37,8 @@ target_include_directories(
 
 enable_testing()
 
-add_executable(kinetic_notation_integration_test test/kinetic_notation_test.c)
+add_executable(kinetic_notation_integration_test
+               test/expected_inputs_give_correct_outputs_test.c)
 
 target_link_libraries(kinetic_notation_integration_test kinetic_notation)
 
