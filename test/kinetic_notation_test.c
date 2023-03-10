@@ -1,26 +1,10 @@
-#include "kinetic_notation/error.h"
-#include "kinetic_notation/structure.h"
+#include "test_asserts.h"
+
 #include <kinetic_notation.h>
+
+// std
 #include <stdio.h>
 #include <string.h>
-
-#define ASSERT_EQ(lhs, rhs)                                                    \
-  {                                                                            \
-    if ((lhs) != (rhs)) {                                                      \
-      fprintf(stderr, "[file: %s][line: %d]\n\t%s != %s\n", __FILE__,          \
-              __LINE__, #lhs, #rhs);                                           \
-      return 1;                                                                \
-    }                                                                          \
-  }
-
-#define ASSERT_NE(lhs, rhs)                                                    \
-  {                                                                            \
-    if ((lhs) == (rhs)) {                                                      \
-      fprintf(stderr, "[file: %s][line: %d]\n\t%s == %s\n", __FILE__,          \
-              __LINE__, #lhs, #rhs);                                           \
-      return 1;                                                                \
-    }                                                                          \
-  }
 
 const char *test_file = "name: \"kinetic_notation\"\n"
                         "c_version: 69 # defaults to 11\n"
