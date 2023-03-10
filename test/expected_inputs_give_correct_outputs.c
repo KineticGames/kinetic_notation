@@ -21,7 +21,7 @@ const char *test_file = "name: \"kinetic_notation\"\n"
                         "	}\n"
                         "]\n";
 
-int main() {
+int expected_inputs_give_correct_outputs() {
   KnStructureCreateInfo create_info = {
       .keys =
           (KnKeyCreateInfo[]){

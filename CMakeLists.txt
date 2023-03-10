@@ -35,12 +35,4 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-enable_testing()
-
-add_executable(kinetic_notation_integration_test
-               test/expected_inputs_give_correct_outputs_test.c)
-
-target_link_libraries(kinetic_notation_integration_test kinetic_notation)
-
-add_test(NAME kinetic_notation_integration_test
-         COMMAND kinetic_notation_integration_test)
+add_subdirectory(test)
