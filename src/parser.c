@@ -1,7 +1,7 @@
 #include "parser.h"
 
 #include "error.h"
-#include "kinetic_notation/structure.h"
+#include "kinetic_notation/definition.h"
 #include "scanner.h"
 #include "structure.h"
 

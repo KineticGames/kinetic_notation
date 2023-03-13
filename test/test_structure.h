@@ -1,0 +1,6 @@
+#ifndef KINETIC_NOTATION_TEST_STRUCTURE_H
+#define KINETIC_NOTATION_TEST_STRUCTURE_H
+
+#include <kinetic_notation.h>
+
+#endif // KINETIC_NOTATION_TEST_STRUCTURE_H
