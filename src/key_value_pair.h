@@ -1,7 +1,7 @@
 #ifndef KINETIC_NOTATION_KEY_VALUE_PAIR_H
 #define KINETIC_NOTATION_KEY_VALUE_PAIR_H
 
-#include "kinetic_notation/structure.h"
+#include "kinetic_notation/definition.h"
 
 typedef struct KVPair_t {
   char *key;

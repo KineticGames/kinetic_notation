@@ -1,7 +1,10 @@
 enable_testing()
 
-create_test_sourcelist(kinetic_notation_test_files test_driver.c
-                       expected_inputs_give_correct_outputs.c)
+create_test_sourcelist(
+  kinetic_notation_test_files test_driver.c
+  expected_inputs_give_correct_outputs.c
+  # get_key_returns_not_found_when_key_not_present.c
+)
 
 add_executable(kinetic_notation_tests ${kinetic_notation_test_files})
 target_link_libraries(kinetic_notation_tests kinetic_notation)
