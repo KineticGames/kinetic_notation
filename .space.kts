@@ -7,7 +7,7 @@ job("CMake Build & Test") {
     }
     container(displayName = "CMake", image = "ubuntu") {
         cache {
-            localPath = "build/*"
+            localPath = "./build"
             storeKey = "cmake-{{ hashFiles('CMakeLists.txt') }}"
         }
         shellScript {
