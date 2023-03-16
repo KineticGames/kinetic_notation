@@ -9,6 +9,7 @@ job("CMake Build & Test") {
     {
       shellScript {
         content = """
+        apt update
         apt install cmake
         cmake -B build --Release
         cmake --build build --Release
