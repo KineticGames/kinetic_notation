@@ -1,16 +1,13 @@
 job("CMake Build & Test") {
   startOn {
     gitPush { enabled = true }
-    codeReviewOpened {
-        branchToCheckout = CodeReviewBranch.MERGE_REQUEST_SOURCE
-      }
     }
     container(displayName = "CMake", image = "ubuntu")
     {
       shellScript {
         content = """
         apt update
-        apt install cmake
+        apt install cmake -y
         cmake -B build --Release
         cmake --build build --Release
         ctest --test-dir build/test
