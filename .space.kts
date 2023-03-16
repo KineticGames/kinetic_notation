@@ -10,7 +10,7 @@ job("CMake Build & Test") {
       shellScript {
         content = """
         apt update
-        apt install cmake -y
+        apt install build-essential cmake -y
         cmake -B build -DCMAKE_BUILD_TYPE={{ build-type }}
         cmake --build build --config {{ build-type }}
         ctest --test-dir build/test -C {{ build-type }}
