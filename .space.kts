@@ -5,7 +5,7 @@ job("CMake Build & Test") {
         branchToCheckout = CodeReviewBranch.MERGE_REQUEST_SOURCE
       }
     }
-    container(displayName = "CMake", image = "ubunu")
+    container(displayName = "CMake", image = "ubuntu")
     {
       shellScript {
         content = """
