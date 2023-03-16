@@ -15,11 +15,11 @@ struct bucket bucket_create(const char *key, const void *value,
 }
 
 void bucket_destroy(struct bucket bucket) {
+  free(bucket.key);
+  free(bucket.value);
+  free(bucket.next);
   if (bucket.next == NULL) {
     return;
   }
   bucket_destroy(*bucket.next);
-  free(bucket.key);
-  free(bucket.value);
-  free(bucket.next);
 }

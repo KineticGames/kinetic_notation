@@ -19,11 +19,11 @@ struct value {
   kn_definition *object_definition;
 };
 
-struct value *create_value(enum value_type type,
-                           kn_definition *object_definition) {
-  struct value *value = malloc(sizeof(struct value));
-  value->type = type;
-  value->object_definition = object_definition;
+struct value create_value(enum value_type type,
+                          kn_definition *object_definition) {
+  struct value value = {};
+  value.type = type;
+  value.object_definition = object_definition;
   return value;
 }
 
@@ -43,29 +43,33 @@ void kn_definition_destroy(kn_definition *definition) {
 }
 
 bool kn_definition_add_boolean(kn_definition *definition, char *key) {
-  return hashmap_insert(definition->keys, key, create_value(BOOLEAN, NULL));
+  struct value value = create_value(BOOLEAN, NULL);
+  return hashmap_insert(definition->keys, key, &value);
 }
 
 bool kn_definition_add_number(kn_definition *definition, char *key) {
-  return hashmap_insert(definition->keys, key, create_value(NUMBER, NULL));
+  struct value value = create_value(NUMBER, NULL);
+  return hashmap_insert(definition->keys, key, &value);
 }
 
 bool kn_definition_add_string(kn_definition *definition, char *key) {
-  return hashmap_insert(definition->keys, key, create_value(STRING, NULL));
+  struct value value = create_value(STRING, NULL);
+  return hashmap_insert(definition->keys, key, &value);
 }
 
 bool kn_definition_add_version(kn_definition *definition, char *key) {
-  return hashmap_insert(definition->keys, key, create_value(VERSION, NULL));
+  struct value value = create_value(VERSION, NULL);
+  return hashmap_insert(definition->keys, key, &value);
 }
 
 bool kn_definition_add_object(kn_definition *definition, char *key,
                               kn_definition *object_definition) {
-  return hashmap_insert(definition->keys, key,
-                        create_value(OBJECT, object_definition));
+  struct value value = create_value(OBJECT, object_definition);
+  return hashmap_insert(definition->keys, key, &value);
 }
 
 bool kn_definition_add_object_array(kn_definition *definition, char *key,
                                     kn_definition *object_definition) {
-  return hashmap_insert(definition->keys, key,
-                        create_value(OBJECT_ARRAY, object_definition));
+  struct value value = create_value(OBJECT_ARRAY, object_definition);
+  return hashmap_insert(definition->keys, key, &value);
 }

@@ -1,4 +1,3 @@
-#include "kinetic_notation/definition.h"
 #include "test_asserts.h"
 #include "test_structure.h"
 
@@ -33,6 +32,7 @@ int expected_inputs_give_correct_outputs() {
   kn_definition_add_version(dependencies, "version");
   kn_definition_add_object_array(definition, "dependencies", dependencies);
 
+  kn_definition_destroy(dependencies);
   kn_definition_destroy(definition);
 
   // if (kinetic_notation_structure_parse(test_file, structure) != SUCCESS) {
