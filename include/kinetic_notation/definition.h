@@ -26,6 +26,8 @@ kn_definition *kn_definition_new();
  */
 void kn_definition_destroy(kn_definition *definition);
 
+kn_definition *kn_definition_copy(kn_definition *definition);
+
 /**
  * @brief This function adds a boolean value to the kn_definition object with
  * the specified key.
@@ -121,5 +123,7 @@ bool kn_definition_add_object(kn_definition *definition, char *key,
  */
 bool kn_definition_add_object_array(kn_definition *definition, char *key,
                                     kn_definition *object_definition);
+
+bool kinetic_notation_parse(kn_definition *definition, const char *string);
 
 #endif // KINETIC_NOTATION_KN_DEFINITION_H

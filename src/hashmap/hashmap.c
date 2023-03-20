@@ -4,13 +4,15 @@
 
 // std
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 struct hashmap {
   size_t member_size;
   hash_fn *hashing_function;
-  struct bucket *buckets;
+  struct bucket **buckets;
   uint32_t bucket_count;
 };
 
@@ -52,19 +54,18 @@ bool hashmap_insert(hashmap *hashmap, const char *key, const void *value) {
     return false;
   }
 
-  struct bucket new_bucket = bucket_create(key, value, hashmap->member_size);
+  struct bucket *new_bucket = bucket_create(key, value, hashmap->member_size);
 
-  if (hashmap->buckets[index].key == NULL) {
+  if (hashmap->buckets[index] == NULL) {
     hashmap->buckets[index] = new_bucket;
     return true;
   }
 
-  struct bucket *b = &hashmap->buckets[index];
+  struct bucket *b = hashmap->buckets[index];
   while (b->next != NULL) {
     b = b->next;
   }
-  b->next = malloc(sizeof(struct bucket));
-  memcpy(b->next, &new_bucket, sizeof(struct bucket));
+  b->next = new_bucket;
 
   return true;
 }
@@ -75,8 +76,8 @@ const void *hashmap_get(const hashmap *hashmap, const char *key) {
     return NULL;
   }
 
-  struct bucket *b = &hashmap->buckets[index];
-  while (b->next != NULL) {
+  struct bucket *b = hashmap->buckets[index];
+  while (b != NULL) {
     if (strcmp(b->key, key) == 0) {
       return b->value;
     }
@@ -91,7 +92,7 @@ void hashmap_remove(hashmap *hashmap, const char *key) {
     return;
   }
 
-  struct bucket *b = &hashmap->buckets[index];
+  struct bucket *b = hashmap->buckets[index];
   struct bucket *p = NULL;
   while (b->next != NULL) {
     if (strcmp(b->key, key) == 0) {
@@ -107,6 +108,21 @@ void hashmap_remove(hashmap *hashmap, const char *key) {
     b = b->next;
   }
   return;
+}
+
+hashmap *hashmap_copy(hashmap *source) {
+  hashmap *copy = hashmap_new(source->member_size);
+  hashmap_set_hashing_function(copy, source->hashing_function,
+                               source->bucket_count);
+
+  for (size_t i = 0; i < source->bucket_count; ++i) {
+    if (source->buckets[i] != NULL) {
+      copy->buckets[i] = malloc(sizeof(struct bucket));
+      bucket_copy(copy->buckets[i], source->buckets[i], source->member_size);
+    }
+  }
+
+  return copy;
 }
 
 static int32_t hashmap_default_hashing_function(const char *key) {

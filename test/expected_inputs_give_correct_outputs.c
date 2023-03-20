@@ -1,11 +1,14 @@
+#include "kinetic_notation/error.h"
 #include "test_asserts.h"
 #include "test_structure.h"
 
 #include <kinetic_notation.h>
 
 // std
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 const char *test_file = "name: \"kinetic_notation\"\n"
@@ -32,13 +35,13 @@ int expected_inputs_give_correct_outputs() {
   kn_definition_add_version(dependencies, "version");
   kn_definition_add_object_array(definition, "dependencies", dependencies);
 
+  if (kinetic_notation_parse(definition, test_file) != true) {
+    printf("%s", kinetic_notation_get_error());
+    return EXIT_FAILURE;
+  }
+
   kn_definition_destroy(dependencies);
   kn_definition_destroy(definition);
-
-  // if (kinetic_notation_structure_parse(test_file, structure) != SUCCESS) {
-  //   fprintf(stderr, "%s\n", kinetic_notation_get_error());
-  //   return 1;
-  // }
 
   // KnValue name_value;
   // ASSERT_EQ(kinetic_notation_structure_get_key(structure, "name",
