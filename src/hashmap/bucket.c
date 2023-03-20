@@ -21,10 +21,9 @@ void bucket_destroy(struct bucket *bucket) {
 
   free(bucket->key);
   free(bucket->value);
-  if (bucket->next == NULL) {
-    return;
+  if (bucket->next != NULL) {
+    bucket_destroy(bucket->next);
   }
-  bucket_destroy(bucket->next);
   free(bucket);
 }
 
@@ -33,13 +32,18 @@ void bucket_copy(struct bucket *dest, const struct bucket *source,
   if (source == NULL) {
     return;
   }
-  dest->key = strdup(source->key);
-  dest->value = malloc(value_size);
-  memcpy(dest->value, source->value, value_size);
+
+  struct bucket copy = {};
+
+  copy.key = strdup(source->key);
+  copy.value = malloc(value_size);
+  memcpy(copy.value, source->value, value_size);
 
   if (source->next != NULL) {
-    dest->next = malloc(sizeof(struct bucket));
+    copy.next = malloc(sizeof(struct bucket));
   }
 
-  bucket_copy(dest->next, source->next, value_size);
+  bucket_copy(copy.next, source->next, value_size);
+
+  memcpy(dest, &copy, sizeof(struct bucket));
 }

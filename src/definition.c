@@ -6,6 +6,8 @@
 #include "parser.h"
 
 // std
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 static struct value create_value(enum value_type type);
@@ -19,6 +21,22 @@ kn_definition *kn_definition_new() {
 }
 
 void kn_definition_destroy(kn_definition *definition) {
+  hashmap_iter *iter = hashmap_make_iter(definition->keys);
+  for (; !hashmap_iter_at_end(iter); hashmap_iter_next(iter)) {
+    struct value *value = hashmap_iter_value(iter);
+    if (value->type == STRING) {
+      free(value->as.string);
+    } else if (value->type == OBJECT) {
+      kn_definition_destroy(value->as.object);
+    } else if (value->type == OBJECT_ARRAY) {
+      for (size_t i = 0; i < value->as.object_array.object_count; ++i) {
+        kn_definition_destroy(value->as.object_array.array[i]);
+      }
+      free(value->as.object_array.array);
+      kn_definition_destroy(value->as.object_array.object_definition);
+    }
+  }
+  hashmap_iter_destroy(iter);
   hashmap_destroy(definition->keys);
   free(definition);
 }

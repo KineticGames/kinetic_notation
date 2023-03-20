@@ -40,7 +40,6 @@ int expected_inputs_give_correct_outputs() {
     return EXIT_FAILURE;
   }
 
-  kn_definition_destroy(dependencies);
   kn_definition_destroy(definition);
 
   // KnValue name_value;

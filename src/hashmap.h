@@ -31,4 +31,16 @@ const void *hashmap_get(const hashmap *hashmap, const char *key);
 
 void hashmap_remove(hashmap *hashmap, const char *key);
 
+typedef struct hashmap_iter hashmap_iter;
+
+hashmap_iter *hashmap_make_iter(hashmap *hashmap);
+
+void hashmap_iter_destroy(hashmap_iter *iter);
+
+void *hashmap_iter_value(hashmap_iter *iter);
+
+void hashmap_iter_next(hashmap_iter *iter);
+
+bool hashmap_iter_at_end(hashmap_iter *iter);
+
 #endif // KINETIC_NOTATION_HASHMAP_H

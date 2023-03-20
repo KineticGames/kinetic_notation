@@ -56,6 +56,9 @@ bool parse(kn_definition *structure, const char *string) {
     }
   }
 
+  free(parser->scanner);
+  free(parser);
+
   return true;
 }
 
@@ -269,6 +272,13 @@ static bool parse_value_as_object_array(Parser parser, struct value *value) {
   memcpy(value->as.object_array.array, array, array_size);
   value->as.object_array.object_count = object_count;
   value->is_specified = true;
+
+  n = object_array;
+  while (n != NULL) {
+    struct object_array_node *next = n->next;
+    free(n);
+    n = next;
+  }
 
   return consume(parser, TOKEN_NEWLINE, "Expect newline after array.");
 }

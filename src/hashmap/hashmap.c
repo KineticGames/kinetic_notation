@@ -26,7 +26,7 @@ hashmap *hashmap_new(size_t member_size) {
   hashmap->member_size = member_size;
   hashmap->bucket_count = DEFAULT_HASHING_FUNCTION_MAX_INDEX + 1;
   hashmap->buckets =
-      calloc(DEFAULT_HASHING_FUNCTION_MAX_INDEX + 1, sizeof(struct bucket));
+      calloc(DEFAULT_HASHING_FUNCTION_MAX_INDEX + 1, sizeof(struct bucket *));
   hashmap->hashing_function = hashmap_default_hashing_function;
   return hashmap;
 }
@@ -40,7 +40,7 @@ void hashmap_set_hashing_function(hashmap *hashmap, hash_fn *function,
                                   uint32_t max_index) {
   hashmap_destroy_buckets(hashmap);
   hashmap->bucket_count = max_index + 1;
-  hashmap->buckets = malloc(sizeof(struct bucket) * max_index + 1);
+  hashmap->buckets = calloc(max_index + 1, sizeof(struct bucket *));
   hashmap->hashing_function = function;
 }
 
@@ -107,13 +107,12 @@ void hashmap_remove(hashmap *hashmap, const char *key) {
     p = b;
     b = b->next;
   }
-  return;
 }
 
 hashmap *hashmap_copy(hashmap *source) {
   hashmap *copy = hashmap_new(source->member_size);
   hashmap_set_hashing_function(copy, source->hashing_function,
-                               source->bucket_count);
+                               source->bucket_count - 1);
 
   for (size_t i = 0; i < source->bucket_count; ++i) {
     if (source->buckets[i] != NULL) {
@@ -124,6 +123,49 @@ hashmap *hashmap_copy(hashmap *source) {
 
   return copy;
 }
+
+struct hashmap_iter {
+  hashmap *hashmap;
+  size_t current_index;
+  struct bucket *current_bucket;
+};
+
+hashmap_iter *hashmap_make_iter(hashmap *hashmap) {
+  hashmap_iter *iter = malloc(sizeof(struct hashmap_iter));
+  iter->hashmap = hashmap;
+  iter->current_index = 0;
+  iter->current_bucket = hashmap->buckets[iter->current_index];
+  if (iter->current_bucket == NULL) {
+    hashmap_iter_next(iter);
+  }
+  return iter;
+}
+
+void *hashmap_iter_value(hashmap_iter *iter) {
+  return iter->current_bucket->value;
+}
+
+void hashmap_iter_next(hashmap_iter *iter) {
+  if (iter->current_bucket == NULL || iter->current_bucket->next == NULL) {
+    do {
+      iter->current_index++;
+      if (iter->current_index >= iter->hashmap->bucket_count) {
+        iter->current_bucket = NULL;
+        return;
+      }
+      iter->current_bucket = iter->hashmap->buckets[iter->current_index];
+    } while (iter->current_bucket == NULL);
+    return;
+  }
+
+  iter->current_bucket = iter->current_bucket->next;
+}
+
+bool hashmap_iter_at_end(hashmap_iter *iter) {
+  return iter->current_bucket == NULL;
+}
+
+void hashmap_iter_destroy(hashmap_iter *iter) { free(iter); }
 
 static int32_t hashmap_default_hashing_function(const char *key) {
   if (key == NULL || key[0] < 'a' || key[0] > 'z') {
