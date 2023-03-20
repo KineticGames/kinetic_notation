@@ -4,8 +4,6 @@
 // std
 #include <stdbool.h>
 
-typedef struct kn_definition kn_definition;
-
 typedef struct {
   int major;
   int minor;

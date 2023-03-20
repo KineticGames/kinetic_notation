@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef struct kn_definition kn_definition;
+
 /**
  * @brief This function creates a new kn_definition object, which is used to
  * define the structure of a Kinetic Notation object.
