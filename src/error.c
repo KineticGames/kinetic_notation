@@ -5,16 +5,14 @@
 
 typedef struct ErrorNode_t {
   const char *message;
-  KnResult associated_result;
   struct ErrorNode_t *next;
 } ErrorNode;
 
 static ErrorNode *error_list = NULL;
 
-void add_error(const char *message, KnResult associated_result) {
+void add_error(const char *message) {
   ErrorNode *error = malloc(sizeof(ErrorNode));
   error->message = message;
-  error->associated_result = associated_result;
   error->next = NULL;
 
   if (error_list == NULL) {

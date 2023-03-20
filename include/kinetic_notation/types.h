@@ -10,11 +10,4 @@ typedef struct {
   int patch;
 } KnVersion;
 
-typedef union {
-  char *string;
-  KnVersion version;
-  int number;
-  bool boolean;
-} KnValue;
-
 #endif // KINETIC_NOTATION_TYPES_H

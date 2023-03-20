@@ -1,16 +1,18 @@
 #include "parser.h"
 
+#include "definition.h"
 #include "error.h"
-#include "kinetic_notation/structure.h"
+#include "hashmap.h"
+#include "kinetic_notation/definition.h"
 #include "scanner.h"
-#include "structure.h"
 
 // std
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define ERROR_BUF_MAX_SIZE 100
+#define ERROR_BUF_MAX_SIZE 200
 
 typedef struct Parser_t {
   Scanner scanner;
@@ -18,38 +20,49 @@ typedef struct Parser_t {
   Token previous;
 } *Parser;
 
-static KnResult advance(Parser parser);
+static void error(Parser parser, const char *message);
+static void error_at(Token token, const char *message);
+static void error_at_current(Parser parser, const char *message);
+
+static bool advance(Parser parser);
 static bool check(Parser parser, TokenType type);
-static KnResult consume(Parser parser, TokenType type, const char *message,
-                        KnResult associated_result);
-static KnResult error(Parser parser, const char *message,
-                      KnResult associated_result);
-static KnResult error_at(Token token, const char *message,
-                         KnResult associated_result);
-static KnResult error_at_current(Parser parser, const char *message,
-                                 KnResult associated_result);
-static KnResult match(Parser parser, TokenType type);
-static KnResult statement(KnStructure structure, Parser parser);
+static bool consume(Parser parser, TokenType type, const char *message);
+static bool match(Parser parser, TokenType type);
 
-KnResult parse(KnStructure structure, const char *source) {
-  KnResult result;
+static struct value *parse_key(kn_definition *definition, Parser parser);
+static bool parse_object(Parser parser, kn_definition *definition);
+
+static bool parse_value_as_string(Parser parser, struct value *value);
+static bool parse_value_as_number(Parser parser, struct value *value);
+static bool parse_value_as_version(Parser parser, struct value *value);
+static bool parse_value_as_boolean(Parser parser, struct value *value);
+static bool parse_value_as_object(Parser parser, struct value *value);
+static bool parse_value_as_object_array(Parser parser, struct value *value);
+
+static bool statement(kn_definition *definition, Parser parser);
+
+bool parse(kn_definition *structure, const char *string) {
   Parser parser = malloc(sizeof(struct Parser_t));
-  parser->scanner = scanner_init(source);
+  parser->scanner = scanner_init(string);
 
-  if ((result = advance(parser)) != SUCCESS) {
-    return result;
+  if (!advance(parser)) {
+    return false;
   }
 
-  while ((result = match(parser, TOKEN_EOF)) == NO_MATCH) {
-    if ((result = statement(structure, parser)) != SUCCESS) {
-      return result;
+  while (!match(parser, TOKEN_EOF)) {
+    if (!statement(structure, parser)) {
+      error(parser, "Expect statement");
+      return false;
     }
   }
 
-  return result;
+  free(parser->scanner);
+  free(parser);
+
+  return true;
 }
 
-static KnResult advance(Parser parser) {
+static bool advance(Parser parser) {
   parser->previous = parser->current;
 
   for (;;) {
@@ -59,32 +72,31 @@ static KnResult advance(Parser parser) {
       break;
     }
 
-    return error_at_current(parser, parser->current.start, SCANNER_ERROR);
+    error_at_current(parser, parser->current.start);
+    return false;
   }
 
-  return SUCCESS;
+  return true;
 }
 
 static bool check(Parser parser, TokenType type) {
   return parser->current.type == type;
 }
 
-static KnResult consume(Parser parser, TokenType type, const char *message,
-                        KnResult associated_result) {
+static bool consume(Parser parser, TokenType type, const char *message) {
   if (parser->current.type == type) {
     return advance(parser);
   }
 
-  return error_at_current(parser, message, associated_result);
+  error_at_current(parser, message);
+  return false;
 }
 
-static KnResult error(Parser parser, const char *message,
-                      KnResult associated_result) {
-  return error_at(parser->previous, message, associated_result);
+static void error(Parser parser, const char *message) {
+  error_at(parser->previous, message);
 }
 
-static KnResult error_at(Token token, const char *message,
-                         KnResult associated_result) {
+static void error_at(Token token, const char *message) {
   char error_buf[ERROR_BUF_MAX_SIZE];
 
   switch (token.type) {
@@ -101,165 +113,138 @@ static KnResult error_at(Token token, const char *message,
     break;
   }
 
-  add_error(error_buf, associated_result);
-  return associated_result;
+  add_error(error_buf);
 }
 
-static KnResult error_at_current(Parser parser, const char *message,
-                                 KnResult associated_result) {
-  return error_at(parser->current, message, associated_result);
+static void error_at_current(Parser parser, const char *message) {
+  return error_at(parser->current, message);
 }
 
-static KnResult match(Parser parser, TokenType type) {
+static bool match(Parser parser, TokenType type) {
   if (!check(parser, type)) {
-    return NO_MATCH;
+    return false;
   }
   return advance(parser);
 }
 
-static KnResult parse_key(KnStructure structure, Parser parser,
-                          KVPair **kv_pair) {
-  KnResult result;
-  if ((result = consume(parser, TOKEN_IDENTIFIER, "Expect key name.",
-                        PARSER_ERROR)) != SUCCESS)
-    return result;
+static struct value *parse_key(kn_definition *definition, Parser parser) {
+  if (!consume(parser, TOKEN_IDENTIFIER, "Expect key name.")) {
+    return NULL;
+  }
 
   char *key = strndup(parser->previous.start, parser->previous.length);
-  *kv_pair = structure_find_key(structure, key);
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
   free(key);
-  if (*kv_pair == NULL) {
-    return error(parser, "Key not defined in structure.", KEY_NOT_FOUND);
+  if (value == NULL) {
+    error(parser, "Key not defined in structure.");
+    return NULL;
   }
 
-  consume(parser, TOKEN_COLON, "Expect ':' after key definition.",
-          PARSER_ERROR);
+  if (!consume(parser, TOKEN_COLON, "Expect ':' after key definition.")) {
+    return NULL;
+  }
 
-  return SUCCESS;
+  return value;
 }
 
-static KnResult parse_string(Parser parser, KVPair *kv_pair) {
-  KnResult result =
-      consume(parser, TOKEN_STRING, "Expect string declaration", PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
+static bool parse_object(Parser parser, kn_definition *definition) {
+  if (!consume(parser, TOKEN_LEFT_BRACE, "Expect '{'.")) {
+    return false;
   }
-  kv_pair->value.string =
+
+  if (!consume(parser, TOKEN_NEWLINE, "Expect newline after opening object.")) {
+    return false;
+  }
+
+  while (!match(parser, TOKEN_RIGHT_BRACE)) {
+    if (!statement(definition, parser)) {
+      error(parser, "Expect statement");
+      return false;
+    }
+  }
+
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after closing object.");
+}
+
+static bool parse_value_as_string(Parser parser, struct value *value) {
+  if (!consume(parser, TOKEN_STRING, "Expect string declaration")) {
+    return false;
+  }
+  value->as.string =
       strndup(parser->previous.start + 1, parser->previous.length - 2);
-  kv_pair->filled = true;
-  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
-                 PARSER_ERROR);
+  value->is_specified = true;
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.");
 }
 
-static KnResult parse_number(Parser parser, KVPair *kv_pair) {
-  KnResult result =
-      consume(parser, TOKEN_NUMBER, "Expect number declaration", PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
+static bool parse_value_as_number(Parser parser, struct value *value) {
+  if (!consume(parser, TOKEN_NUMBER, "Expect number declaration")) {
+    return false;
   }
-  kv_pair->value.number = atoi(parser->previous.start);
-  kv_pair->filled = true;
-  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
-                 PARSER_ERROR);
+
+  value->as.number = strtoul(parser->previous.start, NULL, 10);
+  value->is_specified = true;
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.");
 }
 
-static KnResult parse_version(Parser parser, KVPair *kv_pair) {
-  KnResult result = consume(parser, TOKEN_VERSION, "Expect version declaration",
-                            PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
+static bool parse_value_as_version(Parser parser, struct value *value) {
+  if (!consume(parser, TOKEN_VERSION, "Expect version declaration")) {
+    return false;
   }
+
   KnVersion v;
   sscanf(parser->previous.start, "%d.%d.%d", &v.major, &v.minor, &v.patch);
-  kv_pair->value.version = v;
-  kv_pair->filled = true;
-  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
-                 PARSER_ERROR);
+
+  value->as.version = v;
+  value->is_specified = true;
+
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.");
 }
 
-static KnResult parse_boolean(Parser parser, KVPair *kv_pair) {
-  KnResult result;
-  if ((result = match(parser, TOKEN_TRUE)) != NO_MATCH) {
-    if (result != SUCCESS) {
-      return result;
-    }
-
-    kv_pair->value.boolean = true;
-    kv_pair->filled = true;
-  } else if ((result = match(parser, TOKEN_FALSE)) != NO_MATCH) {
-    if (result != SUCCESS) {
-      return result;
-    }
-
-    kv_pair->value.boolean = false;
-    kv_pair->filled = true;
+static bool parse_value_as_boolean(Parser parser, struct value *value) {
+  if (match(parser, TOKEN_TRUE)) {
+    value->as.boolean = true;
+    value->is_specified = true;
+  } else if (match(parser, TOKEN_FALSE)) {
+    value->as.boolean = false;
+    value->is_specified = true;
   } else {
-    result = advance(parser);
-    if (result != SUCCESS) {
-      return result;
+    if (!advance(parser)) {
+      return false;
     }
 
-    return error_at_current(parser, "Expect one of 'true' or 'false'",
-                            PARSER_ERROR);
+    error_at_current(parser, "Expect one of 'true' or 'false'");
+    return false;
   }
-  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.",
-                 PARSER_ERROR);
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.");
 }
 
-static KnResult parse_object(Parser parser, KnStructure structure) {
-  KnResult result;
-  result = consume(parser, TOKEN_LEFT_BRACE, "Expect '{'.", PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
-  }
-  result = consume(parser, TOKEN_NEWLINE,
-                   "Expect newline after opening object.", PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
-  }
-
-  while ((result = match(parser, TOKEN_RIGHT_BRACE)) == NO_MATCH) {
-    if ((result = statement(structure, parser)) != SUCCESS) {
-      return result;
-    }
-  }
-
-  return consume(parser, TOKEN_NEWLINE, "Expect newline after closing object.",
-                 PARSER_ERROR);
+static bool parse_value_as_object(Parser parser, struct value *value) {
+  return parse_object(parser, value->as.object);
 }
 
-static KnResult parse_sub_object(Parser parser, KVPair *kv_pair) {
-  KnStructure structure = kv_pair->object;
-  return parse_object(parser, structure);
-}
-
-static KnResult parse_object_array(Parser parser, KVPair *kv_pair) {
-  KnResult result;
-  result = consume(parser, TOKEN_LEFT_BRACKET, "Expected '['.", PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
+static bool parse_value_as_object_array(Parser parser, struct value *value) {
+  if (!consume(parser, TOKEN_LEFT_BRACKET, "Expected '['.")) {
+    return false;
   }
-  result = consume(parser, TOKEN_NEWLINE,
-                   "Expect newline after starting array.", PARSER_ERROR);
-  if (result != SUCCESS) {
-    return result;
+
+  if (!consume(parser, TOKEN_NEWLINE, "Expect newline after starting array.")) {
+    return false;
   }
 
   struct object_array_node {
-    KnStructure structure;
+    kn_definition *definition;
     struct object_array_node *next;
   };
 
   size_t object_count = 0;
   struct object_array_node *object_array = NULL;
-  while ((result = match(parser, TOKEN_RIGHT_BRACKET)) == NO_MATCH) {
+  while (!match(parser, TOKEN_RIGHT_BRACKET)) {
     struct object_array_node *node = malloc(sizeof(struct object_array_node));
-    node->structure = malloc(sizeof(struct KnStructure_t));
-    create_structure_from_create_info(kv_pair->object_array.createInfo,
-                                      node->structure);
+    node->definition =
+        kn_definition_copy(value->as.object_array.object_definition);
 
-    result = parse_object(parser, node->structure);
-    if (result != SUCCESS) {
-      return result;
+    if (!parse_object(parser, node->definition)) {
+      return false;
     }
 
     node->next = NULL;
@@ -276,57 +261,49 @@ static KnResult parse_object_array(Parser parser, KVPair *kv_pair) {
     object_count++;
   }
 
-  KnStructure array[object_count];
+  kn_definition *array[object_count];
   struct object_array_node *n = object_array;
   for (int i = 0; i < object_count; ++i) {
-    array[i] = n->structure;
+    array[i] = n->definition;
     n = n->next;
   }
-  size_t array_size = object_count * sizeof(KnStructure);
-  kv_pair->object_array.array = malloc(array_size);
-  memcpy(kv_pair->object_array.array, array, array_size);
-  kv_pair->object_array.objectCount = object_count;
-  kv_pair->filled = true;
+  size_t array_size = object_count * sizeof(kn_definition *);
+  value->as.object_array.array = malloc(array_size);
+  memcpy(value->as.object_array.array, array, array_size);
+  value->as.object_array.object_count = object_count;
+  value->is_specified = true;
 
-  return consume(parser, TOKEN_NEWLINE, "Expect newline after array.",
-                 PARSER_ERROR);
-}
-
-static KnResult parse_variable_key_array(Parser parser, KVPair *kv_pair) {
-  return SUCCESS;
-}
-
-static KnResult statement(KnStructure structure, Parser parser) {
-  KnResult result;
-  KVPair *pair;
-
-  if ((result = parse_key(structure, parser, &pair)) != SUCCESS) {
-    return result;
+  n = object_array;
+  while (n != NULL) {
+    struct object_array_node *next = n->next;
+    free(n);
+    n = next;
   }
 
-  switch (pair->type) {
+  return consume(parser, TOKEN_NEWLINE, "Expect newline after array.");
+}
+
+static bool statement(kn_definition *definition, Parser parser) {
+  struct value *value = parse_key(definition, parser);
+  if (value == NULL) {
+    return false;
+  }
+
+  switch (value->type) {
   case STRING:
-    result = parse_string(parser, pair);
-    break;
+    return parse_value_as_string(parser, value);
   case NUMBER:
-    result = parse_number(parser, pair);
-    break;
+    return parse_value_as_number(parser, value);
   case VERSION:
-    result = parse_version(parser, pair);
-    break;
+    return parse_value_as_version(parser, value);
   case BOOLEAN:
-    result = parse_boolean(parser, pair);
-    break;
-  case SUB_OBJECT:
-    result = parse_sub_object(parser, pair);
-    break;
+    return parse_value_as_boolean(parser, value);
+  case OBJECT:
+    return parse_value_as_object(parser, value);
   case OBJECT_ARRAY:
-    result = parse_object_array(parser, pair);
-    break;
-  case VARIABLE_KEY_ARRAY:
-    result = parse_variable_key_array(parser, pair);
-    break;
+    return parse_value_as_object_array(parser, value);
   }
 
-  return result;
+  add_error("Internal Parsing Error");
+  return false;
 }

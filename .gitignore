@@ -7,6 +7,9 @@
 build/
 cmake-build-*/
 
+# docs
+docs/
+
 # auto generated files
 autogen/
 

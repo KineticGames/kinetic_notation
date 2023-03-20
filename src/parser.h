@@ -3,6 +3,6 @@
 
 #include "kinetic_notation.h"
 
-KnResult parse(KnStructure structure, const char *source);
+bool parse(kn_definition *definition, const char *string);
 
 #endif // KINETIC_NOTATION_PARSER_H
