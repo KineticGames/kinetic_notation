@@ -51,6 +51,18 @@ Token scanner_scan_token(Scanner scanner) {
     return number_or_version(scanner);
   }
 
+  if (c == '\n') {
+    scanner->line++;
+
+    // Consume consecutive newlines
+    while (peek(scanner) == '\n') {
+      advance(scanner);
+      scanner->line++;
+    }
+
+    return make_token(scanner, TOKEN_NEWLINE);
+  }
+
   switch (c) {
   case ('['):
     return make_token(scanner, TOKEN_LEFT_BRACKET);
@@ -62,9 +74,6 @@ Token scanner_scan_token(Scanner scanner) {
     return make_token(scanner, TOKEN_RIGHT_BRACE);
   case (':'):
     return make_token(scanner, TOKEN_COLON);
-  case ('\n'):
-    scanner->line++;
-    return make_token(scanner, TOKEN_NEWLINE);
   case '"':
     return string(scanner);
   }

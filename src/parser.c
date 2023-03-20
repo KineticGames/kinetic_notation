@@ -178,7 +178,7 @@ static bool parse_value_as_number(Parser parser, struct value *value) {
     return false;
   }
 
-  value->as.number = atoi(parser->previous.start);
+  value->as.number = strtoul(parser->previous.start, NULL, 10);
   value->is_specified = true;
   return consume(parser, TOKEN_NEWLINE, "Expect newline after statement.");
 }

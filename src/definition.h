@@ -20,7 +20,7 @@ struct value {
   enum value_type type;
   union {
     bool boolean;
-    int64_t number;
+    uint64_t number;
     KnVersion version;
     char *string;
     kn_definition *object;
