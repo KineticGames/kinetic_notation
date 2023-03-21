@@ -1,7 +1,6 @@
 #ifndef KINETIC_NOTATION_KN_DEFINITION_H
 #define KINETIC_NOTATION_KN_DEFINITION_H
 
-#include "result.h"
 #include "types.h"
 
 // std

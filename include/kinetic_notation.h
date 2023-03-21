@@ -3,7 +3,6 @@
 
 #include "kinetic_notation/definition.h"
 #include "kinetic_notation/error.h"
-#include "kinetic_notation/result.h"
 #include "kinetic_notation/types.h"
 
 #endif // KINETIC_NOTATION_H
