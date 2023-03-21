@@ -3,11 +3,12 @@
 
 // std
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef struct {
-  int major;
-  int minor;
-  int patch;
+  size_t major;
+  size_t minor;
+  size_t patch;
 } kn_version;
 
 #endif // KINETIC_NOTATION_TYPES_H

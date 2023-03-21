@@ -192,7 +192,7 @@ static bool parse_value_as_version(Parser parser, struct value *value) {
   }
 
   kn_version v;
-  sscanf(parser->previous.start, "%d.%d.%d", &v.major, &v.minor, &v.patch);
+  sscanf(parser->previous.start, "%ld.%ld.%ld", &v.major, &v.minor, &v.patch);
 
   value->as.version = v;
   value->is_specified = true;
