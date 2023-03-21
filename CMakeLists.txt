@@ -20,19 +20,15 @@ add_library(
   src/hashmap/bucket.h
   src/parser.c
   src/scanner.c
-  src/string_split.c
   # Private header files
   src/error.h
   src/hashmap.h
   src/parser.h
   src/scanner.h
-  src/string_split.h
   # Public header files
   include/kinetic_notation.h
   include/kinetic_notation/definition.h
-  include/kinetic_notation/error.h
-  include/kinetic_notation/result.h
-  include/kinetic_notation/types.h)
+        include/kinetic_notation/types.h)
 
 target_include_directories(
   kinetic_notation
