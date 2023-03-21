@@ -1,4 +1,3 @@
-#include "kinetic_notation/error.h"
 #include "test_asserts.h"
 #include "test_structure.h"
 
@@ -6,6 +5,7 @@
 
 // std
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@
 
 const char *test_file = "name: \"kinetic_notation\"\n"
                         "c_version: 69 # defaults to 11\n"
-                        "version: 4.2.0\n"
+                        "version: 4.2.0\n\n"
                         "dependencies: [\n"
                         "	{\n"
                         "		name: \"kinetic_dependency\"\n"
@@ -40,59 +40,45 @@ int expected_inputs_give_correct_outputs() {
     return EXIT_FAILURE;
   }
 
+  struct get_string_result name = kn_definition_get_string(definition, "name");
+  ASSERT_EQ(name.result, SUCCESS);
+  ASSERT_EQ(strcmp(name.string, "kinetic_notation"), 0);
+  free(name.string);
+
+  struct get_number_result c_version =
+      kn_definition_get_number(definition, "c_version");
+  ASSERT_EQ(c_version.result, SUCCESS);
+  ASSERT_EQ(c_version.number, 69);
+
+  struct get_version_result version =
+      kn_definition_get_version(definition, "version");
+  ASSERT_EQ(version.result, SUCCESS);
+  ASSERT_EQ(version.version.major, 4);
+  ASSERT_EQ(version.version.minor, 2);
+  ASSERT_EQ(version.version.patch, 0);
+
+  struct get_object_array_length_result length_result =
+      kn_definition_get_object_array_length(definition, "dependencies");
+  ASSERT_EQ(length_result.result, SUCCESS);
+  ASSERT_EQ(length_result.length, 2);
+  size_t length = length_result.length;
+
+  for (size_t i = 0; i < length; ++i) {
+    struct get_object_at_index_result result =
+        kn_definition_get_object_from_array_at_index(definition, "dependencies",
+                                                     i);
+    ASSERT_EQ(result.result, SUCCESS);
+    kn_definition *object = result.object;
+
+    struct get_version_result version =
+        kn_definition_get_version(object, "version");
+    ASSERT_EQ(version.result, SUCCESS);
+    ASSERT_EQ(version.version.major, 4);
+    ASSERT_EQ(version.version.minor, 2);
+    ASSERT_EQ(version.version.patch, 0);
+  }
+
   kn_definition_destroy(definition);
-
-  // KnValue name_value;
-  // ASSERT_EQ(kinetic_notation_structure_get_key(structure, "name",
-  // &name_value),
-  //           SUCCESS);
-  // KnValue c_version_value;
-  // ASSERT_EQ(kinetic_notation_structure_get_key(structure, "c_version",
-  //                                              &c_version_value),
-  //           SUCCESS);
-  // KnValue version_value;
-  // ASSERT_EQ(
-  //     kinetic_notation_structure_get_key(structure, "version",
-  //     &version_value), SUCCESS);
-
-  // ASSERT_EQ(strcmp(name_value.string, "kinetic_notation"), 0);
-  // ASSERT_EQ(c_version_value.number, 69);
-  // ASSERT_EQ(version_value.version.major, 4);
-  // ASSERT_EQ(version_value.version.minor, 2);
-  // ASSERT_EQ(version_value.version.patch, 0);
-
-  // uint32_t object_count;
-  // ASSERT_EQ(kinetic_notation_structure_get_object_array(
-  //               structure, "dependencies", &object_count, NULL),
-  //           SUCCESS);
-  // ASSERT_EQ(object_count, 2);
-
-  // KnStructure objects[object_count];
-  // ASSERT_EQ(kinetic_notation_structure_get_object_array(
-  //               structure, "dependencies", &object_count, objects),
-  //           SUCCESS);
-
-  // KnValue dependency_name_value_0;
-  // ASSERT_EQ(kinetic_notation_structure_get_key(objects[0], "name",
-  //                                              &dependency_name_value_0),
-  //           SUCCESS);
-
-  // KnValue dependency_name_value_1;
-  // ASSERT_EQ(kinetic_notation_structure_get_key(objects[1], "name",
-  //                                              &dependency_name_value_1),
-  //           SUCCESS);
-
-  // KnValue dependency_version_value;
-  // ASSERT_EQ(kinetic_notation_structure_get_key(objects[1], "version",
-  //                                              &dependency_version_value),
-  //           SUCCESS);
-
-  // ASSERT_EQ(strcmp(dependency_name_value_1.string, "dep_2"), 0);
-  // ASSERT_EQ(dependency_version_value.version.major, 4);
-  // ASSERT_EQ(dependency_version_value.version.minor, 2);
-  // ASSERT_EQ(dependency_version_value.version.patch, 0);
-
-  // kinetic_notation_structure_destroy(structure);
 
   return 0;
 }

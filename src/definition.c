@@ -6,9 +6,11 @@
 #include "parser.h"
 
 // std
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static struct value create_value(enum value_type type);
 static struct value create_object_value(kn_definition *object);
@@ -81,6 +83,124 @@ bool kn_definition_add_object_array(kn_definition *definition, char *key,
 
 bool kinetic_notation_parse(kn_definition *definition, const char *string) {
   return parse(definition, string);
+}
+
+struct get_boolean_result kn_definition_get_boolean(kn_definition *definition,
+                                                    char *key) {
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_boolean_result){.result = NOT_A_KEY};
+  }
+  if (value->type != BOOLEAN) {
+    return (struct get_boolean_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_boolean_result){.result = NOT_FILLED_IN};
+  }
+  return (struct get_boolean_result){.boolean = value->as.boolean,
+                                     .result = SUCCESS};
+}
+
+struct get_number_result kn_definition_get_number(kn_definition *definition,
+                                                  char *key) {
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_number_result){.result = NOT_A_KEY};
+  }
+  if (value->type != NUMBER) {
+    return (struct get_number_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_number_result){.result = NOT_FILLED_IN};
+  }
+  return (struct get_number_result){.number = value->as.boolean,
+                                    .result = SUCCESS};
+}
+
+struct get_string_result kn_definition_get_string(kn_definition *definition,
+                                                  char *key) {
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_string_result){.result = NOT_A_KEY};
+  }
+  if (value->type != STRING) {
+    return (struct get_string_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_string_result){.result = NOT_FILLED_IN};
+  }
+  return (struct get_string_result){.string = strdup(value->as.string),
+                                    .result = SUCCESS};
+}
+
+struct get_version_result kn_definition_get_version(kn_definition *definition,
+                                                    char *key) {
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_version_result){.result = NOT_A_KEY};
+  }
+  if (value->type != VERSION) {
+    return (struct get_version_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_version_result){.result = NOT_FILLED_IN};
+  }
+  return (struct get_version_result){.version = value->as.version,
+                                     .result = SUCCESS};
+}
+
+struct get_object_result kn_definition_get_object(kn_definition *definition,
+                                                  char *key) {
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_object_result){.result = NOT_A_KEY};
+  }
+  if (value->type != OBJECT) {
+    return (struct get_object_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_object_result){.result = NOT_FILLED_IN};
+  }
+  return (struct get_object_result){.object = value->as.object,
+                                    .result = SUCCESS};
+}
+
+struct get_object_array_length_result
+kn_definition_get_object_array_length(kn_definition *definition, char *key) {
+
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_object_array_length_result){.result = NOT_A_KEY};
+  }
+  if (value->type != OBJECT_ARRAY) {
+    return (struct get_object_array_length_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_object_array_length_result){.result = NOT_FILLED_IN};
+  }
+  return (struct get_object_array_length_result){
+      .result = SUCCESS, .length = value->as.object_array.object_count};
+}
+
+struct get_object_at_index_result
+kn_definition_get_object_from_array_at_index(kn_definition *definition,
+                                             char *key, size_t index) {
+  struct value *value = (struct value *)hashmap_get(definition->keys, key);
+  if (value == NULL) {
+    return (struct get_object_at_index_result){.result = NOT_A_KEY};
+  }
+  if (value->type != OBJECT_ARRAY) {
+    return (struct get_object_at_index_result){.result = WRONG_TYPE};
+  }
+  if (value->is_specified == false) {
+    return (struct get_object_at_index_result){.result = NOT_FILLED_IN};
+  }
+  if (index < 0 || index >= value->as.object_array.object_count) {
+    return (struct get_object_at_index_result){.result = INDEX_OUT_OF_BOUNDS};
+  }
+
+  return (struct get_object_at_index_result){
+      .object = value->as.object_array.array[index], .result = SUCCESS};
 }
 
 static struct value create_value(enum value_type type) {

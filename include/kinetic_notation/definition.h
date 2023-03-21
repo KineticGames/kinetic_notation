@@ -4,6 +4,7 @@
 #include "types.h"
 
 // std
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -124,5 +125,51 @@ bool kn_definition_add_object_array(kn_definition *definition, char *key,
                                     kn_definition *object_definition);
 
 bool kinetic_notation_parse(kn_definition *definition, const char *string);
+
+typedef enum {
+  SUCCESS,
+  NOT_FILLED_IN,
+  NOT_A_KEY,
+  WRONG_TYPE,
+  INDEX_OUT_OF_BOUNDS,
+} kn_result_value;
+
+struct get_boolean_result {
+  bool boolean;
+  kn_result_value result;
+} kn_definition_get_boolean(kn_definition *definition, char *key);
+
+struct get_number_result {
+  uint64_t number;
+  kn_result_value result;
+} kn_definition_get_number(kn_definition *definition, char *key);
+
+/// Free the string when done with it
+struct get_string_result {
+  char *string;
+  kn_result_value result;
+} kn_definition_get_string(kn_definition *definition, char *key);
+
+struct get_version_result {
+  kn_version version;
+  kn_result_value result;
+} kn_definition_get_version(kn_definition *definition, char *key);
+
+/// Gets a reference *DO NOT FREE*
+struct get_object_result {
+  kn_definition *object;
+  kn_result_value result;
+} kn_definition_get_object(kn_definition *definition, char *key);
+
+struct get_object_array_length_result {
+  size_t length;
+  kn_result_value result;
+} kn_definition_get_object_array_length(kn_definition *definition, char *key);
+
+struct get_object_at_index_result {
+  kn_definition *object;
+  kn_result_value result;
+} kn_definition_get_object_from_array_at_index(kn_definition *definition,
+                                               char *key, size_t index);
 
 #endif // KINETIC_NOTATION_KN_DEFINITION_H
