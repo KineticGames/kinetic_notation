@@ -3,15 +3,15 @@
 
 #include <stdlib.h>
 
-typedef struct ErrorNode_t {
+typedef struct error_node {
   const char *message;
-  struct ErrorNode_t *next;
-} ErrorNode;
+  struct error_node *next;
+} error_node;
 
-static ErrorNode *error_list = NULL;
+static error_node *error_list = NULL;
 
 void add_error(const char *message) {
-  ErrorNode *error = malloc(sizeof(ErrorNode));
+  error_node *error = malloc(sizeof(error_node));
   error->message = message;
   error->next = NULL;
 
@@ -20,7 +20,7 @@ void add_error(const char *message) {
     return;
   }
 
-  ErrorNode *e = error_list;
+  error_node *e = error_list;
 
   while (e->next != NULL) {
     e = e->next;
@@ -33,7 +33,7 @@ const char *kinetic_notation_get_error() {
   if (error_list == NULL) {
     return "No error found!";
   }
-  ErrorNode *n = error_list;
+  error_node *n = error_list;
   while (n->next != NULL) {
     n = n->next;
   }
