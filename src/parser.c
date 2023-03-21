@@ -191,7 +191,7 @@ static bool parse_value_as_version(Parser parser, struct value *value) {
     return false;
   }
 
-  KnVersion v;
+  kn_version v;
   sscanf(parser->previous.start, "%d.%d.%d", &v.major, &v.minor, &v.patch);
 
   value->as.version = v;

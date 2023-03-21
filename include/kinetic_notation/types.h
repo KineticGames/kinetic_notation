@@ -8,6 +8,6 @@ typedef struct {
   int major;
   int minor;
   int patch;
-} KnVersion;
+} kn_version;
 
 #endif // KINETIC_NOTATION_TYPES_H

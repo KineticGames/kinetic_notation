@@ -21,7 +21,7 @@ struct value {
   union {
     bool boolean;
     uint64_t number;
-    KnVersion version;
+    kn_version version;
     char *string;
     kn_definition *object;
     struct {
