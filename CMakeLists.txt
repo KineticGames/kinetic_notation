@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Enable group projects in folders
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
-
 project(kinetic_notation)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -28,7 +24,7 @@ add_library(
   # Public header files
   include/kinetic_notation.h
   include/kinetic_notation/definition.h
-        include/kinetic_notation/types.h)
+  include/kinetic_notation/types.h)
 
 target_include_directories(
   kinetic_notation
