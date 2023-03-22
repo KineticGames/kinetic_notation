@@ -2,6 +2,7 @@
 #include "kinetic_notation/error.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct error_node {
   const char *message;
@@ -12,7 +13,7 @@ static error_node *error_list = NULL;
 
 void add_error(const char *message) {
   error_node *error = malloc(sizeof(error_node));
-  error->message = message;
+  error->message = strdup(message);
   error->next = NULL;
 
   if (error_list == NULL) {
