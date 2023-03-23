@@ -132,44 +132,30 @@ typedef enum {
   NOT_A_KEY,
   WRONG_TYPE,
   INDEX_OUT_OF_BOUNDS,
-} kn_result_value;
+} kn_query_result;
 
-struct get_boolean_result {
-  bool boolean;
-  kn_result_value result;
-} kn_definition_get_boolean(kn_definition *definition, char *key);
+kn_query_result kn_definition_get_boolean(kn_definition *definition, char *key,
+                                          bool *boolean);
 
-struct get_number_result {
-  uint64_t number;
-  kn_result_value result;
-} kn_definition_get_number(kn_definition *definition, char *key);
+kn_query_result kn_definition_get_number(kn_definition *definition, char *key,
+                                         uint64_t *number);
 
 /// Free the string when done with it
-struct get_string_result {
-  char *string;
-  kn_result_value result;
-} kn_definition_get_string(kn_definition *definition, char *key);
+kn_query_result kn_definition_get_string(kn_definition *definition, char *key,
+                                         char **string);
 
-struct get_version_result {
-  kn_version version;
-  kn_result_value result;
-} kn_definition_get_version(kn_definition *definition, char *key);
+kn_query_result kn_definition_get_version(kn_definition *definition, char *key,
+                                          kn_version *version);
 
 /// Gets a reference *DO NOT FREE*
-struct get_object_result {
-  kn_definition *object;
-  kn_result_value result;
-} kn_definition_get_object(kn_definition *definition, char *key);
+kn_query_result kn_definition_get_object(kn_definition *definition, char *key,
+                                         kn_definition **object);
 
-struct get_object_array_length_result {
-  size_t length;
-  kn_result_value result;
-} kn_definition_get_object_array_length(kn_definition *definition, char *key);
+kn_query_result kn_definition_get_object_array_length(kn_definition *definition,
+                                                      char *key,
+                                                      size_t *length);
 
-struct get_object_at_index_result {
-  kn_definition *object;
-  kn_result_value result;
-} kn_definition_get_object_from_array_at_index(kn_definition *definition,
-                                               char *key, size_t index);
+kn_query_result kn_definition_get_object_from_array_at_index(
+    kn_definition *definition, char *key, size_t index, kn_definition **object);
 
 #endif // KINETIC_NOTATION_KN_DEFINITION_H
