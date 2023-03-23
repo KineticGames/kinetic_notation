@@ -25,6 +25,19 @@ const char *test_file = "name: \"kinetic_notation\"\n"
                         "	}\n"
                         "]\n";
 
+typedef struct {
+  char *name;
+  kn_version version;
+} dependency;
+
+typedef struct {
+  char *name;
+  uint64_t c_version;
+  kn_version version;
+  size_t dependency_count;
+  dependency *dependencies;
+} test_structure;
+
 int expected_inputs_give_correct_outputs() {
   kn_definition *definition = kn_definition_new();
   kn_definition_add_string(definition, "name");
@@ -40,43 +53,47 @@ int expected_inputs_give_correct_outputs() {
     return EXIT_FAILURE;
   }
 
-  struct get_string_result name = kn_definition_get_string(definition, "name");
-  ASSERT_EQ(name.result, SUCCESS);
-  ASSERT_EQ(strcmp(name.string, "kinetic_notation"), 0);
-  free(name.string);
+  test_structure test_structure = {};
 
-  struct get_number_result c_version =
-      kn_definition_get_number(definition, "c_version");
-  ASSERT_EQ(c_version.result, SUCCESS);
-  ASSERT_EQ(c_version.number, 69);
+  ASSERT_EQ(kn_definition_get_string(definition, "name", &test_structure.name),
+            SUCCESS);
 
-  struct get_version_result version =
-      kn_definition_get_version(definition, "version");
-  ASSERT_EQ(version.result, SUCCESS);
-  ASSERT_EQ(version.version.major, 4);
-  ASSERT_EQ(version.version.minor, 2);
-  ASSERT_EQ(version.version.patch, 0);
+  ASSERT_EQ(kn_definition_get_number(definition, "c_version",
+                                     &test_structure.c_version),
+            SUCCESS);
 
-  struct get_object_array_length_result length_result =
-      kn_definition_get_object_array_length(definition, "dependencies");
-  ASSERT_EQ(length_result.result, SUCCESS);
-  ASSERT_EQ(length_result.length, 2);
-  size_t length = length_result.length;
+  ASSERT_EQ(
+      kn_definition_get_version(definition, "version", &test_structure.version),
+      SUCCESS);
 
-  for (size_t i = 0; i < length; ++i) {
-    struct get_object_at_index_result result =
-        kn_definition_get_object_from_array_at_index(definition, "dependencies",
-                                                     i);
-    ASSERT_EQ(result.result, SUCCESS);
-    kn_definition *object = result.object;
+  ASSERT_EQ(kn_definition_get_object_array_length(
+                definition, "dependencies", &test_structure.dependency_count),
+            SUCCESS);
+  ASSERT_EQ(test_structure.dependency_count, 2);
 
-    struct get_version_result version =
-        kn_definition_get_version(object, "version");
-    ASSERT_EQ(version.result, SUCCESS);
-    ASSERT_EQ(version.version.major, 4);
-    ASSERT_EQ(version.version.minor, 2);
-    ASSERT_EQ(version.version.patch, 0);
+  test_structure.dependencies =
+      calloc(test_structure.dependency_count, sizeof(dependency));
+  for (size_t i = 0; i < test_structure.dependency_count; ++i) {
+    kn_definition *dependency;
+    ASSERT_EQ(kn_definition_get_object_from_array_at_index(
+                  definition, "dependencies", i, &dependency),
+              SUCCESS);
+
+    ASSERT_EQ(
+        kn_definition_get_version(dependency, "version",
+                                  &test_structure.dependencies[i].version),
+        SUCCESS);
+    ASSERT_EQ(test_structure.dependencies[i].version.major, 4);
+    ASSERT_EQ(test_structure.dependencies[i].version.minor, 2);
+    ASSERT_EQ(test_structure.dependencies[i].version.patch, 0);
   }
+
+  ASSERT_EQ(strcmp(test_structure.name, "kinetic_notation"), 0);
+  ASSERT_EQ(test_structure.c_version, 69);
+  ASSERT_EQ(test_structure.version.major, 4);
+  ASSERT_EQ(test_structure.version.minor, 2);
+  ASSERT_EQ(test_structure.version.patch, 0);
+  free(test_structure.name);
 
   kn_definition_destroy(definition);
 
