@@ -219,7 +219,11 @@ static bool parse_value_as_boolean(Parser parser, struct value *value) {
 }
 
 static bool parse_value_as_object(Parser parser, struct value *value) {
-  return parse_object(parser, value->as.object);
+  if (parse_object(parser, value->as.object)) {
+    value->is_specified = true;
+    return true;
+  }
+  return false;
 }
 
 static bool parse_value_as_object_array(Parser parser, struct value *value) {
