@@ -4,6 +4,7 @@
 .vscode/
 
 # build dir
+target/
 build/
 cmake-build-*/
 
