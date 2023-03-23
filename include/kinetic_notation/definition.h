@@ -132,6 +132,7 @@ typedef enum {
   NOT_A_KEY,
   WRONG_TYPE,
   INDEX_OUT_OF_BOUNDS,
+  NULL_REFERENCE,
 } kn_query_result;
 
 kn_query_result kn_definition_get_boolean(kn_definition *definition, char *key,

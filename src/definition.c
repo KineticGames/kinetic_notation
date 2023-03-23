@@ -88,6 +88,9 @@ bool kinetic_notation_parse(kn_definition *definition, const char *string) {
 
 kn_query_result kn_definition_get_boolean(kn_definition *definition, char *key,
                                           bool *boolean) {
+  if (boolean == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
@@ -104,6 +107,9 @@ kn_query_result kn_definition_get_boolean(kn_definition *definition, char *key,
 
 kn_query_result kn_definition_get_number(kn_definition *definition, char *key,
                                          uint64_t *number) {
+  if (number == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
@@ -120,6 +126,9 @@ kn_query_result kn_definition_get_number(kn_definition *definition, char *key,
 
 kn_query_result kn_definition_get_string(kn_definition *definition, char *key,
                                          char **string) {
+  if (string == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
@@ -136,6 +145,9 @@ kn_query_result kn_definition_get_string(kn_definition *definition, char *key,
 
 kn_query_result kn_definition_get_version(kn_definition *definition, char *key,
                                           kn_version *version) {
+  if (version == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
@@ -152,6 +164,9 @@ kn_query_result kn_definition_get_version(kn_definition *definition, char *key,
 
 kn_query_result kn_definition_get_object(kn_definition *definition, char *key,
                                          kn_definition **object) {
+  if (object == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
@@ -169,7 +184,9 @@ kn_query_result kn_definition_get_object(kn_definition *definition, char *key,
 kn_query_result kn_definition_get_object_array_length(kn_definition *definition,
                                                       char *key,
                                                       size_t *length) {
-
+  if (length == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
@@ -188,6 +205,9 @@ kn_query_result
 kn_definition_get_object_from_array_at_index(kn_definition *definition,
                                              char *key, size_t index,
                                              kn_definition **object) {
+  if (object == NULL) {
+    return NULL_REFERENCE;
+  }
   struct value *value = (struct value *)hashmap_get(definition->keys, key);
   if (value == NULL) {
     return NOT_A_KEY;
