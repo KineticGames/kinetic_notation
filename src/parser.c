@@ -107,6 +107,7 @@ static void error_at(Token token, const char *message) {
   case TOKEN_ERROR:
     snprintf(error_buf, ERROR_BUF_MAX_SIZE, "[line %d] Error: %s\n", token.line,
              message);
+    break;
   default:
     snprintf(error_buf, ERROR_BUF_MAX_SIZE, "[line %d] Error at '%.*s': %s\n",
              token.line, token.length, token.start, message);
@@ -267,7 +268,7 @@ static bool parse_value_as_object_array(Parser parser, struct value *value) {
 
   kn_definition *array[object_count];
   struct object_array_node *n = object_array;
-  for (int i = 0; i < object_count; ++i) {
+  for (size_t i = 0; i < object_count; ++i) {
     array[i] = n->definition;
     n = n->next;
   }
