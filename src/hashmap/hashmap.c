@@ -72,7 +72,7 @@ bool hashmap_insert(hashmap *hashmap, const char *key, const void *value) {
 
 const void *hashmap_get(const hashmap *hashmap, const char *key) {
   int32_t index = hashmap->hashing_function(key);
-  if (index < 0 || index > hashmap->bucket_count) {
+  if (index < 0 || (uint32_t)index > hashmap->bucket_count) {
     return NULL;
   }
 
@@ -88,7 +88,7 @@ const void *hashmap_get(const hashmap *hashmap, const char *key) {
 
 void hashmap_remove(hashmap *hashmap, const char *key) {
   int32_t index = hashmap->hashing_function(key);
-  if (index < 0 || index > hashmap->bucket_count) {
+  if (index < 0 || (uint32_t)index > hashmap->bucket_count) {
     return;
   }
 
@@ -175,7 +175,7 @@ static int32_t hashmap_default_hashing_function(const char *key) {
 }
 
 static void hashmap_destroy_buckets(hashmap *hashmap) {
-  for (int i = 0; i < hashmap->bucket_count; ++i) {
+  for (uint32_t i = 0; i < hashmap->bucket_count; ++i) {
     bucket_destroy(hashmap->buckets[i]);
   }
   free(hashmap->buckets);

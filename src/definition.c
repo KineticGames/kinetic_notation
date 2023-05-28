@@ -218,7 +218,7 @@ kn_definition_get_object_from_array_at_index(kn_definition *definition,
   if (value->is_specified == false) {
     return NOT_FILLED_IN;
   }
-  if (index < 0 || index >= value->as.object_array.object_count) {
+  if (index >= value->as.object_array.object_count) {
     return INDEX_OUT_OF_BOUNDS;
   }
 
